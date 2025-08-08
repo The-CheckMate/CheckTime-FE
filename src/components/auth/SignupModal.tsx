@@ -66,8 +66,16 @@ export default function SignupModal({
     if (!canSubmit) return;
     setLoading(true);
     try {
-      await onSubmit?.({ username: username.trim(), email, password });
-      onClose();
+      await onSubmit?.({
+        username: username.trim(),
+        email,
+        password,
+      });
+      onClose(); // 회원가입 성공 시 모달 닫기
+    } catch (err) {
+      alert(
+        err instanceof Error ? err.message : '회원가입 중 오류가 발생했습니다.',
+      );
     } finally {
       setLoading(false);
     }
