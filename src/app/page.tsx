@@ -3,10 +3,15 @@
 import Header from '@/components/ui/Header';
 import SearchForm from '@/components/ServerSearchForm';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import KoreanStandardTime from '@/components/KoreanStandaradTime';
+import LoginModal from '@/components/auth/LoginModal';
+import SignupModal from '@/components/auth/SignupModal';
 
 export default function Home() {
   const router = useRouter();
+  const [signupOpen, setSignupOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
 
   const handleSubmit = (url: string) => {
     router.push(`/result?url=${encodeURIComponent(url)}`);
@@ -15,7 +20,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Header */}
-      <Header />
+      <Header onLoginClick={() => setLoginOpen(true)} />
 
       {/* Hero */}
       <section className="text-center py-16">
@@ -42,6 +47,76 @@ export default function Home() {
       <section className="max-w-3xl mx-auto mb-20 p-10">
         <KoreanStandardTime showToggle={false} />
       </section>
+
+      {/* 로그인 모달 */}
+      <LoginModal
+        open={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onSignupClick={() => {
+          setLoginOpen(false);
+          setSignupOpen(true);
+        }}
+        onSubmit={async ({ email, password }) => {
+          try {
+            const res = await fetch(
+              `${process.env.NEXT_PUBLIC_API_BASE}/api/auth/login`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+              },
+            );
+            const data = await res.json();
+
+            if (!res.ok) {
+              throw new Error(data.error || '로그인 실패');
+            }
+
+            // JWT 토큰 저장 (accessToken, refreshToken)
+            localStorage.setItem('accessToken', data.data.accessToken);
+            localStorage.setItem('refreshToken', data.data.refreshToken);
+
+            console.log('로그인 성공', data.data.user);
+            // 필요 시 사용자 상태 관리 (예: Context/Redux/SWR)
+            setLoginOpen(false);
+          } catch (err) {
+            alert(err instanceof Error ? err.message : '로그인 중 오류 발생');
+          }
+        }}
+      />
+
+      {/* 회원가입 모달 */}
+      <SignupModal
+        open={signupOpen}
+        onClose={() => setSignupOpen(false)}
+        onLoginClick={() => {
+          setSignupOpen(false);
+          setLoginOpen(true);
+        }}
+        onSubmit={async ({ username, email, password }) => {
+          try {
+            const res = await fetch(
+              `${process.env.NEXT_PUBLIC_API_BASE}/api/auth/register`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password }),
+              },
+            );
+            const data = await res.json();
+
+            if (!res.ok) {
+              throw new Error(data.error || '회원가입 실패');
+            }
+
+            console.log('회원가입 성공', data.data.user);
+            alert('회원가입이 완료되었습니다. 로그인 해주세요.');
+            setSignupOpen(false);
+          } catch (err) {
+            alert(err instanceof Error ? err.message : '회원가입 중 오류 발생');
+          }
+        }}
+      />
     </div>
   );
 }
