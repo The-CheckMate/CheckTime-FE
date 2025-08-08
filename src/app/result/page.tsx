@@ -339,7 +339,83 @@ export default function CheckTimeApp() {
     setAlarmData(data);
   };
 
-  const handleSubmit = async (url: string) => {
+  // URL 형식인지 확인하는 함수
+  const isValidUrl = (str: string) => {
+    try {
+      new URL(str);
+      return true;
+    } catch {
+      return str.startsWith('http://') || str.startsWith('https://');
+    }
+  };
+
+  // Site 인터페이스
+  interface Site {
+    id: number;
+    url: string;
+    name: string;
+    category: string;
+    description?: string;
+    keywords: string[];
+    usage_count: number;
+    optimal_offset: number;
+    average_rtt: number;
+    success_rate: number;
+  }
+
+  // 키워드로 사이트 검색해서 첫 번째 결과의 URL 가져오기
+  const getUrlFromKeyword = async (keyword: string): Promise<string | null> => {
+    try {
+      console.log(`키워드 검색 시작: "${keyword}"`);
+
+      const response = await fetch(
+        `http://localhost:3001/api/sites?search=${encodeURIComponent(
+          keyword.trim(),
+        )}&limit=5`,
+      );
+      const data = await response.json();
+
+      console.log('검색 API 응답:', data);
+
+      if (data.success && data.data.sites && data.data.sites.length > 0) {
+        const sites: Site[] = data.data.sites;
+
+        // 모든 검색 결과 로그 출력
+        console.log(`"${keyword}" 검색 결과 (${sites.length}개):`);
+        sites.forEach((site: Site, index: number) => {
+          console.log(`  ${index + 1}. ${site.name} - ${site.url}`);
+          console.log(`     키워드: [${site.keywords?.join(', ') || '없음'}]`);
+        });
+
+        // 키워드와 정확히 매치되는 사이트 찾기
+        const exactMatch = sites.find((site: Site) =>
+          site.keywords?.some(
+            (kw: string) => kw.toLowerCase() === keyword.toLowerCase(),
+          ),
+        );
+
+        if (exactMatch) {
+          console.log(`정확 매치 발견: ${exactMatch.name} - ${exactMatch.url}`);
+          return exactMatch.url;
+        }
+
+        // 정확 매치가 없으면 첫 번째 결과 사용
+        const firstResult = sites[0];
+        console.log(
+          `정확 매치 없음. 첫 번째 결과 사용: ${firstResult.name} - ${firstResult.url}`,
+        );
+        return firstResult.url;
+      }
+
+      console.log(`"${keyword}" 검색 결과 없음`);
+      return null;
+    } catch (error) {
+      console.error('사이트 검색 실패:', error);
+      return null;
+    }
+  };
+
+  const handleSubmit = async (input: string) => {
     setIsLoading(true);
     setServerTimeData(null);
 
@@ -347,13 +423,34 @@ export default function CheckTimeApp() {
       const startTime = Date.now(); // 클라이언트 요청 시작 시간 기록
       const clientTimeAtRequest = new Date().toISOString(); // 요청 시점의 클라이언트 시간
 
+      let finalUrl = input.trim();
+
+      // URL 형식이 아니면 키워드로 검색
+      if (!isValidUrl(finalUrl)) {
+        console.log(`키워드 검색 시작: "${finalUrl}"`);
+        const foundUrl = await getUrlFromKeyword(finalUrl);
+
+        if (foundUrl) {
+          finalUrl = foundUrl;
+          console.log(`검색 성공: ${input} → ${finalUrl}`);
+        } else {
+          setServerTimeData({
+            url: input,
+            clientTime: clientTimeAtRequest,
+            error: `"${input}"에 대한 검색 결과가 없습니다.\n\n사용 가능한 키워드 예시:\n- 숭실대, SSU, 수강신청\n- 인터파크, 티켓, 콘서트\n- 무신사, 쇼핑, 패션\n- 예스24, 책, 도서\n- 지마켓, 쇼핑몰`,
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
+
       // 1. /api/time/compare 엔드포인트 호출
       const compareResponse = await fetch(
         'http://localhost:3001/api/time/compare',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ targetUrl: url }),
+          body: JSON.stringify({ targetUrl: finalUrl }),
         },
       );
 
@@ -367,7 +464,7 @@ export default function CheckTimeApp() {
 
           // api/time/compare 응답에서 필요한 데이터 추출
           setServerTimeData({
-            url,
+            url: finalUrl,
             clientTime: clientTimeAtRequest, // 클라이언트 요청 시작 시의 시간
             serverTime: apiData.timeComparison?.correctedTargetTime, // 보정된 타겟 서버 시간
             timeDifference: apiData.timeComparison?.timeDifference, // 우리 서버 시간 - 타겟 서버 시간 (백엔드에서 계산된 값)
@@ -383,14 +480,14 @@ export default function CheckTimeApp() {
           });
         } else {
           setServerTimeData({
-            url,
+            url: finalUrl,
             clientTime: clientTimeAtRequest,
             error: result.error || '서버 시간 비교 실패',
           });
         }
       } else {
         setServerTimeData({
-          url,
+          url: finalUrl,
           clientTime: clientTimeAtRequest,
           error: `API 통신 오류: ${compareResponse.status} ${compareResponse.statusText}`,
         });
@@ -398,7 +495,7 @@ export default function CheckTimeApp() {
     } catch (error: unknown) {
       console.error('서버 시간 확인 실패:', error);
       setServerTimeData({
-        url,
+        url: input,
         clientTime: new Date().toISOString(),
         error:
           error instanceof Error
@@ -445,7 +542,7 @@ export default function CheckTimeApp() {
 
       {/* 서버 시간 검색 폼 */}
       <div className="mt-4 flex justify-center mb-4">
-        <ServerSearchForm onSubmit={(url) => handleSubmit(url)} />
+        <ServerSearchForm onSubmit={(input) => handleSubmit(input)} />
       </div>
 
       <hr className="my-4 border-t border-gray-300 w-full max-w-4xl mx-auto" />
