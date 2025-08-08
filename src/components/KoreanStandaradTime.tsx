@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 
 export default function KoreanStandardTime({
   showMilliseconds = true,
+  showToggle = true, // 밀리초 체크박스 표시 여부
 }: {
   showMilliseconds?: boolean;
+  showToggle?: boolean;
 }) {
   const [time, setTime] = useState<Date | null>(null);
 
@@ -64,7 +66,7 @@ export default function KoreanStandardTime({
       </div>
 
       <div className="text-center">
-        <div className="flex items-center justify-center gap-4 text-6xl font-bold text-gray-800">
+        <div className="flex items-center justify-center gap-4 text-5xl font-bold text-gray-800">
           {(() => {
             const [h, m, s, ms] = formatTime(time).split(/[:.]/);
             return (
@@ -78,24 +80,27 @@ export default function KoreanStandardTime({
                   <>
                     <span className="text-gray-400">:</span>
                     <span className="text-4xl">{ms}</span>
+
+                    {showToggle && (
+                      <span className="flex items-center text-xl text-gray-500 ml-2 gap-2">
+                        밀리초
+                        <input
+                          type="checkbox"
+                          checked={showMilliseconds}
+                          onChange={(e) =>
+                            typeof window !== 'undefined' &&
+                            document.dispatchEvent(
+                              new CustomEvent('toggleMilliseconds', {
+                                detail: e.target.checked,
+                              }),
+                            )
+                          }
+                          className="w-4 h-4"
+                        />
+                      </span>
+                    )}
                   </>
                 )}
-                <span className="flex items-center text-2xl text-gray-500 ml-2 gap-2">
-                  밀리초
-                  <input
-                    type="checkbox"
-                    checked={showMilliseconds}
-                    onChange={(e) =>
-                      typeof window !== 'undefined' &&
-                      document.dispatchEvent(
-                        new CustomEvent('toggleMilliseconds', {
-                          detail: e.target.checked,
-                        }),
-                      )
-                    }
-                    className="w-4 h-4"
-                  />
-                </span>
               </>
             );
           })()}
