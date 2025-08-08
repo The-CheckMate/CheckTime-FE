@@ -8,7 +8,7 @@ type Props = {
   onSubmit?: (payload: {
     email: string;
     password: string;
-  }) => Promise<boolean> | boolean; // 로그인 성공 시 true 반환
+  }) => Promise<boolean> | boolean;
   onSignupClick?: () => void; // 회원가입 열기
 };
 

@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { RefreshCw, Clock, Info } from 'lucide-react';
 import AlarmModal, { AlarmData } from '@/components/AlarmModal';
 import { useSearchParams } from 'next/navigation';
-import KoreanStandardTime from '@/components/KoreanStandaradTime';
+import KoreanStandardTime from '@/components/KoreanStandardTime';
 import ServerSearchForm from '@/components/ServerSearchForm';
 import AlarmCountdown from '@/components/AlarmCountdown';
 

@@ -4,7 +4,7 @@ import Header from '@/components/ui/Header';
 import SearchForm from '@/components/ServerSearchForm';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import KoreanStandardTime from '@/components/KoreanStandaradTime';
+import KoreanStandardTime from '@/components/KoreanStandardTime';
 import LoginModal from '@/components/auth/LoginModal';
 import SignupModal from '@/components/auth/SignupModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';

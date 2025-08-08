@@ -75,7 +75,7 @@ export default function Header({
               )}
               <button
                 type="button"
-                onClick={onLogoutClick}
+                onClick={() => onLogoutClick?.()}
                 className="px-4 py-2 rounded-md text-sm border border-gray-300 hover:bg-gray-50"
               >
                 로그아웃
@@ -84,7 +84,7 @@ export default function Header({
           ) : (
             <button
               type="button"
-              onClick={onLoginClick}
+              onClick={() => onLoginClick?.()}
               className="bg-black text-white hover:bg-black/80 px-4 py-2 rounded-md text-sm transition"
             >
               로그인
