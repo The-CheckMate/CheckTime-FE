@@ -349,7 +349,7 @@ export default function CheckTimeApp() {
 
       // 1. /api/time/compare 엔드포인트 호출
       const compareResponse = await fetch(
-        'http://localhost:3001/api/time/compare',
+        `${process.env.NEXT_PUBLIC_API_BASE}/api/time/compare`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
