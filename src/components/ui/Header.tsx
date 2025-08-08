@@ -4,14 +4,13 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 
-export default function Header() {
+export default function Header({ onLoginClick }: { onLoginClick: () => void }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 100);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -55,18 +54,13 @@ export default function Header() {
 
         {/* 액션 버튼 */}
         <div className="flex items-center gap-3">
-          <Link
-            href="#"
-            className="text-gray-600 hover:bg-gray-100 px-4 py-2 rounded-md text-sm transition-colors"
-          >
-            로그인
-          </Link>
-          <Link
-            href="#"
+          <button
+            type="button"
+            onClick={onLoginClick}
             className="bg-black text-white hover:bg-black/80 px-4 py-2 rounded-md text-sm transition"
           >
-            시작하기
-          </Link>
+            로그인
+          </button>
         </div>
       </div>
     </header>
