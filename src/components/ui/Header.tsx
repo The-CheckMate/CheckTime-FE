@@ -4,7 +4,19 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 
-export default function Header({ onLoginClick }: { onLoginClick: () => void }) {
+type Props = {
+  onLoginClick: () => void; // 로그인 모달 열기
+  isAuthed?: boolean; // 로그인 여부
+  onLogoutClick?: () => void; // 로그아웃 함수
+  userName?: string; // 사용자 이름
+};
+
+export default function Header({
+  onLoginClick,
+  isAuthed = false,
+  onLogoutClick,
+  userName,
+}: Props) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -52,15 +64,32 @@ export default function Header({ onLoginClick }: { onLoginClick: () => void }) {
           </Link>
         </nav>
 
-        {/* 액션 버튼 */}
+        {/* 액션 */}
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onLoginClick}
-            className="bg-black text-white hover:bg-black/80 px-4 py-2 rounded-md text-sm transition"
-          >
-            로그인
-          </button>
+          {isAuthed ? (
+            <>
+              {userName && (
+                <span className="hidden sm:inline text-sm text-gray-600">
+                  안녕하세요, <b>{userName}</b>님
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={onLogoutClick}
+                className="px-4 py-2 rounded-md text-sm border border-gray-300 hover:bg-gray-50"
+              >
+                로그아웃
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={onLoginClick}
+              className="bg-black text-white hover:bg-black/80 px-4 py-2 rounded-md text-sm transition"
+            >
+              로그인
+            </button>
+          )}
         </div>
       </div>
     </header>

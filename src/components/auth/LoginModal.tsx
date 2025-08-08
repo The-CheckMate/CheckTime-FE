@@ -8,7 +8,7 @@ type Props = {
   onSubmit?: (payload: {
     email: string;
     password: string;
-  }) => Promise<void> | void;
+  }) => Promise<boolean> | boolean; // 로그인 성공 시 true 반환
   onSignupClick?: () => void; // 회원가입 열기
 };
 
@@ -37,8 +37,8 @@ export default function LoginModal({
     const password = String(fd.get('password') || '');
     setLoading(true);
     try {
-      await onSubmit?.({ email, password });
-      onClose();
+      const ok = await onSubmit?.({ email, password });
+      if (ok) onClose(); // 로그인 성공 시 모달 닫기
     } finally {
       setLoading(false);
     }
