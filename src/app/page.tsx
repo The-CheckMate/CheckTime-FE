@@ -3,7 +3,7 @@
 import Header from '@/components/ui/Header';
 import SearchForm from '@/components/ServerSearchForm';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import KoreanStandardTime from '@/components/KoreanStandardTime';
 import LoginModal from '@/components/auth/LoginModal';
 import SignupModal from '@/components/auth/SignupModal';
@@ -43,15 +43,20 @@ export default function Home() {
     router.push('/'); // 홈으로 리다이렉트
   };
 
+  const headerProps: React.ComponentProps<typeof Header> = isAuthed
+    ? {
+        isAuthed: true as const,
+        userName: userName!,
+        onLogoutClick: () => setConfirmOpen(true),
+      }
+    : {
+        onLoginClick: () => setLoginOpen(true),
+      };
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Header */}
-      <Header
-        onLoginClick={() => setLoginOpen(true)}
-        isAuthed={isAuthed}
-        onLogoutClick={() => setConfirmOpen(true)}
-        userName={userName}
-      />
+      <Header {...headerProps} />
 
       {/* Hero */}
       <section className="text-center py-16">

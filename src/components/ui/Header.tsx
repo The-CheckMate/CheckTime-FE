@@ -4,25 +4,27 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 
-type Props = {
-  onLoginClick: () => void; // 로그인 모달 열기
-  isAuthed?: boolean; // 로그인 여부
-  onLogoutClick?: () => void; // 로그아웃 함수
-  userName?: string; // 사용자 이름
+type AuthedProps = {
+  isAuthed: true;
+  userName: string;
+  onLoginClick?: never;
+  onLogoutClick: () => void; // 로그아웃 함수
 };
 
-export default function Header({
-  onLoginClick,
-  isAuthed = false,
-  onLogoutClick,
-  userName,
-}: Props) {
+type GuestProps = {
+  isAuthed?: false;
+  userName?: never;
+  onLoginClick: () => void; // 로그인 모달 열기
+  onLogoutClick?: never;
+};
+
+type HeaderProps = AuthedProps | GuestProps;
+
+export default function Header(props: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 100);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 100);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -66,16 +68,16 @@ export default function Header({
 
         {/* 액션 */}
         <div className="flex items-center gap-3">
-          {isAuthed ? (
+          {props.isAuthed ? (
             <>
-              {userName && (
+              {props.userName && (
                 <span className="hidden sm:inline text-sm text-gray-600">
-                  안녕하세요, <b>{userName}</b>님
+                  안녕하세요, <b>{props.userName}</b>님
                 </span>
               )}
               <button
                 type="button"
-                onClick={() => onLogoutClick?.()}
+                onClick={() => props.onLogoutClick?.()}
                 className="px-4 py-2 rounded-md text-sm border border-gray-300 hover:bg-gray-50"
               >
                 로그아웃
@@ -84,7 +86,7 @@ export default function Header({
           ) : (
             <button
               type="button"
-              onClick={() => onLoginClick?.()}
+              onClick={() => props.onLoginClick?.()} // 게스트에서만 허용
               className="bg-black text-white hover:bg-black/80 px-4 py-2 rounded-md text-sm transition"
             >
               로그인
