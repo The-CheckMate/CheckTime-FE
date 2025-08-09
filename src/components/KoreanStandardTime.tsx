@@ -16,7 +16,18 @@ export default function KoreanStandardTime({
 
     const fetchTime = async () => {
       try {
-        const res = await fetch('http://localhost:3001/api/time/current'); // 배포 시 서버 주소로 변경
+        const apiPath = `/api/time/current`;
+        const base = process.env.NEXT_PUBLIC_API_BASE;
+        const url = base ? new URL(apiPath, base).toString() : apiPath;
+
+        const res = await fetch(url, { cache: 'no-store' }); // 캐시를 사용하지 않도록 설정
+
+        if (!res.ok) {
+          throw new Error(
+            `시간 API 호출 실패: ${res.status} ${res.statusText}`,
+          );
+        }
+
         const data = await res.json();
 
         if (data.success && data.data.timestamp) {
