@@ -3,16 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 type Phase = 'idle' | 'ready' | 'go' | 'tooSoon' | 'result';
-type LevelKey = 'easy' | 'normal' | 'hard';
 
-const LEVELS: Record<LevelKey, { label: string; range: [number, number] }> = {
-  easy: { label: '쉬움 (3–5초)', range: [3000, 5000] },
-  normal: { label: '보통 (1–3초)', range: [1000, 3000] },
-  hard: { label: '어려움 (0.5–2초)', range: [500, 2000] },
-};
+// 단일 모드: 0.5s ~ 5s
+const DELAY_RANGE: [number, number] = [500, 5000];
 
 export default function Page() {
-  const [level, setLevel] = useState<LevelKey>('easy');
   const [phase, setPhase] = useState<Phase>('idle');
   const [records, setRecords] = useState<number[]>([]);
   const [current, setCurrent] = useState<number | null>(null);
@@ -21,7 +16,7 @@ export default function Page() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTsRef = useRef<number | null>(null);
 
-  // best 기록 로컬 저장
+  // 최고 기록 로컬 저장
   useEffect(() => {
     const saved = localStorage.getItem('reaction-best-ms');
     if (saved) setBest(Number(saved));
@@ -48,7 +43,8 @@ export default function Page() {
     if (phase === 'ready' || phase === 'go') return;
     setCurrent(null);
     setPhase('ready');
-    const [min, max] = LEVELS[level].range;
+
+    const [min, max] = DELAY_RANGE;
     const delay = Math.floor(Math.random() * (max - min + 1)) + min;
 
     resetWaitingTimer();
@@ -109,7 +105,7 @@ export default function Page() {
         <header className="mb-6">
           <h1 className="text-2xl font-bold">반응속도 테스트</h1>
           <p className="text-sm text-gray-600">
-            티켓팅 성공을 위한 반응속도 훈련을 시작하세요!
+            티켓팅 성공을 위한 반응속도 측정을 시작하세요!
           </p>
         </header>
 
@@ -117,30 +113,6 @@ export default function Page() {
           {/* 좌측: 메인 카드 */}
           <section className="lg:col-span-2">
             <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              {/* 난이도 탭 */}
-              <div className="mb-6 flex gap-2">
-                {(Object.keys(LEVELS) as LevelKey[]).map((k) => {
-                  const active = level === k;
-                  return (
-                    <button
-                      key={k}
-                      onClick={() => {
-                        if (phase === 'ready' || phase === 'go') return;
-                        setLevel(k);
-                      }}
-                      className={[
-                        'rounded-full px-4 py-2 text-sm transition',
-                        active
-                          ? 'bg-gray-900 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
-                      ].join(' ')}
-                    >
-                      {LEVELS[k].label}
-                    </button>
-                  );
-                })}
-              </div>
-
               {/* 원형 영역 */}
               <div className="flex flex-col items-center">
                 <button
