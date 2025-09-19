@@ -52,7 +52,7 @@ export default function Header(props: HeaderProps) {
 
         {/* 네비게이션 */}
         <nav className="hidden md:flex items-center gap-8 text-sm text-gray-600 font-medium">
-          <Link href="#" className="hover:text-black transition-colors">
+          <Link href="/ranking" className="hover:text-black transition-colors">
             실시간 랭킹
           </Link>
           <Link
