@@ -24,7 +24,10 @@ export const getPopularSites = async ({
   period,
   category,
 }: FetchParams): Promise<Site[]> => {
-  const BASE_URL = 'http://localhost:3001/api/sites/popular/popular-sites';
+  const BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE}/api/sites/popular/popular-sites`;
+  if (!process.env.NEXT_PUBLIC_API_BASE) {
+    throw new Error('환경변수 NEXT_PUBLIC_API_BASE가 설정되지 않았습니다.');
+  }
 
   const params = new URLSearchParams({
     period,
@@ -38,11 +41,13 @@ export const getPopularSites = async ({
 
   try {
     // API 요청
-    const response = await fetch(`${BASE_URL}?${params.toString()}`);
+    const url = `${BASE_URL}?${params.toString()}`;
+    const response = await fetch(url, { cache: 'no-store' });
 
-    // HTTP 응답 상태가 'ok'가 아니면 에러를 발생시킴
     if (!response.ok) {
-      throw new Error('네트워크 응답에 문제가 있습니다.');
+      throw new Error(
+        `네트워크 오류: ${response.status} ${response.statusText}`,
+      );
     }
 
     const result: ApiResponse = await response.json();
