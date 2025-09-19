@@ -12,6 +12,7 @@ export interface Bookmark {
 export interface BookmarkCreateRequest {
   custom_name: string;
   custom_url: string;
+  favicon?: string; // 선택적 필드로 유지 (백엔드에서 사용)
 }
 
 export interface BookmarkUpdateRequest {

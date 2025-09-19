@@ -5,6 +5,7 @@ import { Bookmark, BookmarkFormData } from '@/types/bookmark';
 import { BookmarkAPI } from '@/libs/api/bookmarks';
 import BookmarkItem from './BookmarkItem';
 import BookmarkModal from './BookmarkModal';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 export default function BookmarkList() {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
@@ -17,6 +18,10 @@ export default function BookmarkList() {
     Bookmark | undefined
   >();
   const [modalLoading, setModalLoading] = useState(false);
+  
+  // 시간확인 확인 모달 상태
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [selectedBookmark, setSelectedBookmark] = useState<Bookmark | null>(null);
 
   // 초기 데이터 로딩
   useEffect(() => {
@@ -59,6 +64,29 @@ export default function BookmarkList() {
       setBookmarks((prev) => prev.filter((b) => b.id !== id));
     } catch (err) {
       alert(err instanceof Error ? err.message : '북마크 삭제에 실패했습니다.');
+    }
+  };
+
+  // 북마크 시간 확인 (확인 모달 표시)
+  const handleCheckTime = (bookmark: Bookmark) => {
+    setSelectedBookmark(bookmark);
+    setConfirmModalOpen(true);
+  };
+
+  // 실제 시간 확인 실행
+  const executeCheckTime = async () => {
+    if (!selectedBookmark) return;
+    
+    try {
+      await BookmarkAPI.clickBookmark(selectedBookmark.id);
+      // 시간 확인 결과를 새 창에서 열기
+      window.open(`/result?url=${encodeURIComponent(selectedBookmark.custom_url)}`, '_blank');
+      setConfirmModalOpen(false);
+      setSelectedBookmark(null);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '시간 확인에 실패했습니다.');
+      setConfirmModalOpen(false);
+      setSelectedBookmark(null);
     }
   };
 
@@ -144,32 +172,18 @@ export default function BookmarkList() {
       </div>
 
       {/* 북마크 목록 */}
-      {bookmarks.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <div className="text-gray-400 text-4xl mb-4">📚</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            아직 북마크가 없습니다
-          </h3>
-          <p className="text-gray-600 mb-4">첫 번째 북마크를 추가해보세요!</p>
-          <button
-            onClick={handleAdd}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            북마크 추가하기
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {bookmarks.map((bookmark) => (
-            <BookmarkItem
-              key={bookmark.id}
-              bookmark={bookmark}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))}
-        </div>
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {bookmarks.map((bookmark) => (
+          <BookmarkItem
+            key={bookmark.id}
+            bookmark={bookmark}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onCheckTime={handleCheckTime}
+            viewMode="grid"
+          />
+        ))}
+      </div>
 
       {/* 북마크 추가/수정 모달 */}
       <BookmarkModal
@@ -178,6 +192,20 @@ export default function BookmarkList() {
         bookmark={editingBookmark}
         onSubmit={handleModalSubmit}
         isLoading={modalLoading}
+      />
+
+      {/* 시간확인 확인 모달 */}
+      <ConfirmModal
+        open={confirmModalOpen}
+        title="시간 확인"
+        message={`"${selectedBookmark?.custom_name}" 사이트의 시간을 확인하시겠습니까?`}
+        confirmText="확인"
+        cancelText="취소"
+        onConfirm={executeCheckTime}
+        onClose={() => {
+          setConfirmModalOpen(false);
+          setSelectedBookmark(null);
+        }}
       />
     </div>
   );
