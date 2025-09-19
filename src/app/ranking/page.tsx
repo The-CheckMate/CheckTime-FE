@@ -38,13 +38,6 @@ export default function RankingPage() {
         category: activeCategory,
       });
 
-      // 중복된 site_id가 있는지 검사합니다.
-      // const ids = fetchedSites.map((s) => s.site_id);
-      // const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
-      // if (duplicates.length > 0) {
-      //   console.log('🚨 중복된 site_id가 발견되었습니다:', duplicates);
-      // }
-
       setSites(fetchedSites);
     } catch (err) {
       setError(
