@@ -472,7 +472,7 @@ export default function CheckTimeApp() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 px-4 py-8">
+    <div className="min-h-screen px-4">
       {/* 서버 시간 검색 폼 */}
       <div className="mt-4 flex justify-center mb-4">
         <ServerSearchForm onSubmit={handleSubmit} />

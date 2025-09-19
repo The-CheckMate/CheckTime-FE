@@ -47,23 +47,23 @@ export default function ServerSearchForm({ onSubmit }: ServerSearchFormProps) {
   };
 
   return (
-    <div>
+    <div className="w-full">
       <form
         onSubmit={handleSubmit}
-        className="mt-2 flex w-full max-w-2xl items-center gap-2"
+        className="mt-2 flex w-full max-w-3xl items-center gap-3 mx-auto"
       >
         <Input
           type="text"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="서버 시간 확인이 필요한 url 주소를 검색해 보세요"
-          className="flex-1 bg-white shadow-md placeholder:text-gray-400 py-4 text-lg h-14"
+          className="flex-1 bg-white placeholder:text-gray-400 py-4 text-lg h-14 min-w-0"
         />
 
         <Button
           type="submit"
           disabled={isLoading}
-          className="bg-brand-blue hover:bg-brand-blue-500 active:bg-brand-blue-900 disabled:opacity-50"
+          className="bg-brand-blue hover:bg-brand-blue-500 active:bg-brand-blue-900 disabled:opacity-50 px-8 py-4 text-lg font-semibold whitespace-nowrap"
         >
           {isLoading ? '검색 중...' : 'Check!'}
         </Button>
@@ -71,7 +71,7 @@ export default function ServerSearchForm({ onSubmit }: ServerSearchFormProps) {
       
       {/* 에러 메시지 표시 */}
       {error && (
-        <div className="mt-2 text-red-500 text-sm text-center">
+        <div className="mt-4 text-red-500 text-sm text-center max-w-6xl mx-auto">
           {error}
         </div>
       )}
