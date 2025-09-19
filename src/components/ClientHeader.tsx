@@ -5,10 +5,16 @@ import Header from '@/components/ui/Header';
 import LoginModal from './auth/LoginModal';
 import SignupModal from './auth/SignupModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function ClientHeader() {
   const router = useRouter();
+
+  const pathname = usePathname();
+  const HIDE_ON = ['/bookmarks'];
+  const hideHeader = HIDE_ON.some(
+    (p) => pathname === p || pathname.startsWith(p + '/'),
+  );
 
   // 전역 헤더 상태
   const [isAuthed, setIsAuthed] = useState(false);
@@ -120,15 +126,16 @@ export default function ClientHeader() {
   return (
     <>
       {/* 헤더 */}
-      {isAuthed ? (
-        <Header
-          isAuthed
-          userName={userName ?? ''}
-          onLogoutClick={() => setConfirmOpen(true)}
-        />
-      ) : (
-        <Header onLoginClick={() => setLoginOpen(true)} />
-      )}
+      {!hideHeader &&
+        (isAuthed ? (
+          <Header
+            isAuthed
+            userName={userName ?? ''}
+            onLogoutClick={() => setConfirmOpen(true)}
+          />
+        ) : (
+          <Header onLoginClick={() => setLoginOpen(true)} />
+        ))}
 
       {/* 로그인 모달 */}
       <LoginModal
