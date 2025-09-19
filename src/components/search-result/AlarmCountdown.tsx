@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AlarmData } from './AlarmModal';
+import { AlarmData } from './search-result/AlarmModal';
 
 interface AlarmCountdownProps {
   alarm: AlarmData;

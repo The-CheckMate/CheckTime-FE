@@ -1,9 +1,9 @@
 'use client';
 
-import SearchForm from '@/components/ServerSearchForm';
+import ServerSearchForm from '@/components/search-result/ServerSearchForm';
 import { useRouter } from 'next/navigation';
 import React from 'react';
-import KoreanStandardTime from '@/components/KoreanStandardTime';
+import KoreanStandardTime from '@/components/search-result/KoreanStandardTime';
 
 export default function Home() {
   const router = useRouter();
@@ -26,12 +26,12 @@ export default function Home() {
         </h1>
         <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
           서버와의 시간 차이를 실시간으로 확인하고, 완벽한 타이밍으로 티켓팅에
-          성공하세요.
+          성공하세요!
         </p>
       </section>
       {/* URL Input */}
       <section className="max-w-xl mx-auto">
-        <SearchForm onSubmit={handleSubmit} />
+        <ServerSearchForm onSubmit={handleSubmit} />
       </section>
       {/* Current Time */}
       <section className="max-w-3xl mx-auto mb-20 p-10">

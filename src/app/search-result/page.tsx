@@ -3,11 +3,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, Clock, Info } from 'lucide-react';
-import AlarmModal, { AlarmData } from '@/components/AlarmModal';
+import AlarmModal, { AlarmData } from '@/components/search-result/AlarmModal';
 import { useSearchParams } from 'next/navigation';
-import KoreanStandardTime from '@/components/KoreanStandardTime';
-import ServerSearchForm from '@/components/ServerSearchForm';
-import AlarmCountdown from '@/components/AlarmCountdown';
+import KoreanStandardTime from '@/components/search-result/KoreanStandardTime';
+import ServerSearchForm from '@/components/search-result/ServerSearchForm';
+import AlarmCountdown from '@/components/search-result/AlarmCountdown';
 
 // RTTResult와 RTTData 인터페이스는 api/network/rtt에서 사용되므로,
 // api/time/compare가 직접 이 데이터를 반환하지 않는다면 필요 없을 수 있습니다.
