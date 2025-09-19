@@ -8,7 +8,7 @@ import KoreanStandardTime from '@/components/search-result/KoreanStandardTime';
 export default function Home() {
   const router = useRouter();
   const handleSubmit = (url: string) => {
-    router.push(`/result?url=${encodeURIComponent(url)}`);
+    router.push(`/search-result?url=${encodeURIComponent(url)}`);
   };
 
   return (

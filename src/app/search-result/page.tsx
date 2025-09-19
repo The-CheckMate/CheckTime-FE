@@ -1,13 +1,14 @@
 // 검색 결과 및 알림 화면
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, Clock, Info } from 'lucide-react';
 import AlarmModal, { AlarmData } from '@/components/search-result/AlarmModal';
 import { useSearchParams } from 'next/navigation';
 import KoreanStandardTime from '@/components/search-result/KoreanStandardTime';
 import ServerSearchForm from '@/components/search-result/ServerSearchForm';
 import AlarmCountdown from '@/components/search-result/AlarmCountdown';
+import { SiteAPI } from '@/libs/api/sites';
 
 // RTTResult와 RTTData 인터페이스는 api/network/rtt에서 사용되므로,
 // api/time/compare가 직접 이 데이터를 반환하지 않는다면 필요 없을 수 있습니다.
@@ -349,73 +350,10 @@ export default function CheckTimeApp() {
     }
   };
 
-  // Site 인터페이스
-  interface Site {
-    id: number;
-    url: string;
-    name: string;
-    category: string;
-    description?: string;
-    keywords: string[];
-    usage_count: number;
-    optimal_offset: number;
-    average_rtt: number;
-    success_rate: number;
-  }
+  // Site 인터페이스는 이미 import됨
 
-  // 키워드로 사이트 검색해서 첫 번째 결과의 URL 가져오기
-  const getUrlFromKeyword = async (keyword: string): Promise<string | null> => {
-    try {
-      console.log(`키워드 검색 시작: "${keyword}"`);
 
-      const response = await fetch(
-        `http://localhost:3001/api/sites?search=${encodeURIComponent(
-          keyword.trim(),
-        )}&limit=5`,
-      );
-      const data = await response.json();
-
-      console.log('검색 API 응답:', data);
-
-      if (data.success && data.data.sites && data.data.sites.length > 0) {
-        const sites: Site[] = data.data.sites;
-
-        // 모든 검색 결과 로그 출력
-        console.log(`"${keyword}" 검색 결과 (${sites.length}개):`);
-        sites.forEach((site: Site, index: number) => {
-          console.log(`  ${index + 1}. ${site.name} - ${site.url}`);
-          console.log(`     키워드: [${site.keywords?.join(', ') || '없음'}]`);
-        });
-
-        // 키워드와 정확히 매치되는 사이트 찾기
-        const exactMatch = sites.find((site: Site) =>
-          site.keywords?.some(
-            (kw: string) => kw.toLowerCase() === keyword.toLowerCase(),
-          ),
-        );
-
-        if (exactMatch) {
-          console.log(`정확 매치 발견: ${exactMatch.name} - ${exactMatch.url}`);
-          return exactMatch.url;
-        }
-
-        // 정확 매치가 없으면 첫 번째 결과 사용
-        const firstResult = sites[0];
-        console.log(
-          `정확 매치 없음. 첫 번째 결과 사용: ${firstResult.name} - ${firstResult.url}`,
-        );
-        return firstResult.url;
-      }
-
-      console.log(`"${keyword}" 검색 결과 없음`);
-      return null;
-    } catch (error) {
-      console.error('사이트 검색 실패:', error);
-      return null;
-    }
-  };
-
-  const handleSubmit = async (input: string) => {
+  const handleSubmit = useCallback(async (input: string) => {
     setIsLoading(true);
     setServerTimeData(null);
 
@@ -425,13 +363,13 @@ export default function CheckTimeApp() {
 
       let finalUrl = input.trim();
 
-      // URL 형식이 아니면 키워드로 검색
+      // 백엔드 API에서 URL/키워드 검색 처리
       if (!isValidUrl(finalUrl)) {
         console.log(`키워드 검색 시작: "${finalUrl}"`);
-        const foundUrl = await getUrlFromKeyword(finalUrl);
-
-        if (foundUrl) {
-          finalUrl = foundUrl;
+        const searchResult = await SiteAPI.searchSites(finalUrl, true);
+        
+        if (searchResult.results && searchResult.results.length > 0) {
+          finalUrl = searchResult.results[0].url;
           console.log(`검색 성공: ${input} → ${finalUrl}`);
         } else {
           setServerTimeData({
@@ -505,7 +443,7 @@ export default function CheckTimeApp() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const listener = (e: Event) => {
@@ -525,7 +463,7 @@ export default function CheckTimeApp() {
     }
     document.addEventListener('toggleMilliseconds', listener);
     return () => document.removeEventListener('toggleMilliseconds', listener);
-  }, [initialUrl]);
+  }, [initialUrl, handleSubmit]);
 
   const handleRefresh = () => {
     if (serverTimeData) {
@@ -535,14 +473,9 @@ export default function CheckTimeApp() {
 
   return (
     <div className="min-h-screen bg-gray-100 px-4 py-8">
-      {/* 헤더 */}
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-blue-600">Check Time</h1>
-      </div>
-
       {/* 서버 시간 검색 폼 */}
       <div className="mt-4 flex justify-center mb-4">
-        <ServerSearchForm onSubmit={(input) => handleSubmit(input)} />
+        <ServerSearchForm onSubmit={handleSubmit} />
       </div>
 
       <hr className="my-4 border-t border-gray-300 w-full max-w-4xl mx-auto" />
