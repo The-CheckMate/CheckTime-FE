@@ -246,13 +246,13 @@ function ServerTimeResult({
             <div className="max-w-md mx-auto bg-green-50 border-2 border-green-200 rounded-xl p-6">
               <div className="text-center">
                 <div className="text-green-800 font-medium mb-2">
-                  {serverName} 서버가{' '}
+                  {serverName} 서버가
                   <span className="font-bold">
                     {getTimeDifferenceText(
                       Math.abs(data.timeComparison.timeDifference),
                     )}
-                  </span>{' '}
-                  더{' '}
+                  </span>
+                  더
                   <span className="font-bold">
                     {data.timeComparison.direction === 'ahead'
                       ? '빠릅니다'

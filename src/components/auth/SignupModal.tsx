@@ -234,7 +234,7 @@ export default function SignupModal({
           </button>
         </form>
         <p className="text-center text-sm text-gray-500 mt-4">
-          이미 계정이 있으신가요?{' '}
+          이미 계정이 있으신가요?
           <button
             type="button"
             onClick={() => {
