@@ -181,7 +181,6 @@ export default function BookmarksPage() {
           </Link>
           
           <nav className="flex items-center gap-8">
-            <Link href="/" className="text-gray-600 text-sm font-medium hover:text-black transition-colors no-underline">홈</Link>
             <a href="#" className="text-gray-600 text-sm font-medium hover:text-black transition-colors no-underline">실시간 랭킹</a>
             <a href="#" className="text-gray-600 text-sm font-medium hover:text-black transition-colors no-underline">반응속도 게임</a>
             <a href="/bookmarks" className="text-black text-sm font-semibold no-underline">북마크</a>
