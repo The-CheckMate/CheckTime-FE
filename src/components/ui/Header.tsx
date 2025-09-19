@@ -58,7 +58,10 @@ export default function Header(props: HeaderProps) {
           <Link href="#" className="hover:text-black transition-colors">
             반응속도 게임
           </Link>
-          <Link href="#" className="hover:text-black transition-colors">
+          <Link
+            href="/bookmarks"
+            className="hover:text-black transition-colors"
+          >
             북마크
           </Link>
           <Link href="#" className="hover:text-black transition-colors">
