@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Clock, Info } from 'lucide-react';
+import { RefreshCw, Info, Bell, X } from 'lucide-react';
 import AlarmCountdown from './AlarmCountdown';
 import AlarmModal, { AlarmData } from './AlarmModal';
 
@@ -91,6 +91,7 @@ interface ServerTimeResultProps {
   showMilliseconds: boolean;
   alarmData?: AlarmData | null;
   onAlarmConfirm: (data: AlarmData) => void;
+  onAlarmDelete?: () => void;
 }
 
 export default function ServerTimeResult({
@@ -99,6 +100,7 @@ export default function ServerTimeResult({
   showMilliseconds,
   alarmData,
   onAlarmConfirm,
+  onAlarmDelete,
 }: ServerTimeResultProps) {
   const [currentServerTime, setCurrentServerTime] = useState<Date | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -224,16 +226,16 @@ export default function ServerTimeResult({
         data.timeComparison.timeDifference !== undefined &&
         data.timeComparison.timeDifference !== null && (
           <div className="mb-8">
-            <div className="max-w-md mx-auto bg-green-50 border-2 border-green-200 rounded-xl p-6">
+            <div className="max-w-md mx-auto rounded-xl">
               <div className="text-center">
-                <div className="text-green-800 font-medium mb-2">
-                  {serverName} 서버가
+                <div className="font-medium">
+                    타겟 서버가&nbsp;
                   <span className="font-bold">
                     {getTimeDifferenceText(
                       Math.abs(data.timeComparison.timeDifference),
-                    )}
+                    )}&nbsp;
                   </span>
-                  더
+                  더&nbsp;
                   <span className="font-bold">
                     {data.timeComparison.direction === 'ahead'
                       ? '빠릅니다'
@@ -247,15 +249,36 @@ export default function ServerTimeResult({
         )}
 
       {/* 알람 카운트다운 컴포넌트 */}
-      {alarmData && <AlarmCountdown alarm={alarmData} />}
+      {alarmData && (
+        <div className="mb-6">
+          <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                <Bell className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-700">알람 설정됨</div>
+              </div>
+            </div>
+            <button
+              onClick={onAlarmDelete}
+              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-150"
+              title="알람 삭제"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <AlarmCountdown alarm={alarmData} />
+        </div>
+      )}
 
       {/* 새로고침 버튼 */}
       <div className="text-center mb-8">
         <button
           onClick={onRefresh}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-150 text-sm font-medium"
         >
-          <RefreshCw className="w-5 h-5" />
+          <RefreshCw className="w-4 h-4" />
           새로고침
         </button>
       </div>
@@ -264,7 +287,6 @@ export default function ServerTimeResult({
       {data.networkInfo && (
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 text-gray-600">
-            <Clock className="w-5 h-5" />
             <span>RTT: {data.networkInfo.rtt.toFixed(1)}ms</span>
             {data.networkInfo.networkDelay && (
               <span className="ml-4">
@@ -276,28 +298,30 @@ export default function ServerTimeResult({
       )}
 
       {/* 알림 설정 버튼 */}
-      <div className="text-center mb-4">
-        <button
-          className="inline-flex items-center gap-2 px-8 py-4 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors text-lg font-medium"
-          onClick={() => setShowAlarmModal(true)}
-        >
-          <Info className="w-5 h-5" />
-          정확한 타이밍에 클릭을 도와드릴까요?
-        </button>
+      {!alarmData && (
+        <div className="text-center mb-6">
+          <button
+            className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-md hover:bg-slate-800 transition-colors duration-200 text-sm font-medium"
+            onClick={() => setShowAlarmModal(true)}
+          >
+            <Bell className="w-4 h-4" />
+            알림 설정
+          </button>
 
-        {/* 알림 모달 */}
-        {showAlarmModal && (
-          <AlarmModal onConfirm={onAlarmConfirm} onClose={handleAlarmClose} />
-        )}
-      </div>
+          {/* 알림 모달 */}
+          {showAlarmModal && (
+            <AlarmModal onConfirm={onAlarmConfirm} onClose={handleAlarmClose} />
+          )}
+        </div>
+      )}
 
       {/* 상세 정보 버튼 */}
       <div className="text-center">
         <button
           onClick={() => setShowDetailModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-gray-500 hover:text-gray-700 transition-colors duration-150 text-xs font-medium"
         >
-          <Info className="w-4 h-4" />
+          <Info className="w-3 h-3" />
           상세 정보
         </button>
       </div>
@@ -316,9 +340,9 @@ export default function ServerTimeResult({
               <h2 className="text-2xl font-bold text-gray-800">상세 정보</h2>
               <button
                 onClick={handleDetailClose}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
+                className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-150"
               >
-                ×
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -348,7 +372,7 @@ export default function ServerTimeResult({
                   <h3 className="text-lg font-semibold text-gray-700 mb-3">
                     시간 비교
                   </h3>
-                  <div className="bg-blue-50 rounded-lg p-4 space-y-2">
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-600">우리 서버 시간:</span>
                       <span className="font-mono text-sm">
@@ -391,7 +415,7 @@ export default function ServerTimeResult({
                   <h3 className="text-lg font-semibold text-gray-700 mb-3">
                     네트워크 정보
                   </h3>
-                  <div className="bg-green-50 rounded-lg p-4 space-y-2">
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-600">RTT:</span>
                       <span className="font-mono text-sm">
@@ -420,7 +444,7 @@ export default function ServerTimeResult({
                   <h3 className="text-lg font-semibold text-gray-700 mb-3">
                     분석 결과
                   </h3>
-                  <div className="bg-yellow-50 rounded-lg p-4 space-y-2">
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-600">정확도:</span>
                       <span className="font-mono text-sm">
@@ -449,7 +473,7 @@ export default function ServerTimeResult({
                   <h3 className="text-lg font-semibold text-gray-700 mb-3">
                     메타데이터
                   </h3>
-                  <div className="bg-purple-50 rounded-lg p-4 space-y-2">
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-600">NTP 동기화 상태:</span>
                       <span className="font-mono text-sm">

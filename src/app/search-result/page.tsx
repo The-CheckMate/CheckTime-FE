@@ -45,6 +45,10 @@ export default function CheckTimeApp() {
     setAlarmData(data);
   };
 
+  const handleAlarmDelete = () => {
+    setAlarmData(null);
+  };
+
   // URL 형식인지 확인하는 함수
   const isValidUrl = (str: string) => {
     try {
@@ -204,6 +208,7 @@ export default function CheckTimeApp() {
             showMilliseconds={showMilliseconds}
             alarmData={alarmData} // 알람 데이터가 있을 경우에만 AlarmCountdown 사용
             onAlarmConfirm={handleAlarmConfirm}
+            onAlarmDelete={handleAlarmDelete}
           />
         </div>
       )}

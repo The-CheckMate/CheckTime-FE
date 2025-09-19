@@ -63,9 +63,9 @@ export default function ServerSearchForm({ onSubmit }: ServerSearchFormProps) {
         <Button
           type="submit"
           disabled={isLoading}
-          className="bg-brand-blue hover:bg-brand-blue-500 active:bg-brand-blue-900 disabled:opacity-50 px-8 py-4 text-lg font-semibold whitespace-nowrap"
+          className="bg-slate-900 hover:bg-slate-800 disabled:opacity-50 px-6 py-3 text-sm font-medium whitespace-nowrap transition-colors duration-150"
         >
-          {isLoading ? '검색 중...' : 'Check!'}
+          {isLoading ? '검색 중...' : '검색'}
         </Button>
       </form>
       
