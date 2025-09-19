@@ -6,7 +6,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onSubmit?: (payload: {
-    username: string;
+    userName: string;
     email: string;
     password: string;
   }) => Promise<void> | void;
@@ -19,7 +19,7 @@ export default function SignupModal({
   onSubmit,
   onLoginClick,
 }: Props) {
-  const [username, setUsername] = useState('');
+  const [userName, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -55,7 +55,7 @@ export default function SignupModal({
       : 'bg-green-500 w-full';
 
   const canSubmit =
-    username.trim().length >= 2 &&
+    userName.trim().length >= 2 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
     passwordStrength >= 3 &&
     password === confirmPassword &&
@@ -67,7 +67,7 @@ export default function SignupModal({
     setLoading(true);
     try {
       await onSubmit?.({
-        username: username.trim(),
+        userName: userName.trim(),
         email,
         password,
       });
@@ -125,13 +125,13 @@ export default function SignupModal({
             <input
               id="username"
               type="text"
-              value={username}
+              value={userName}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="홍길동"
               required
               className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-200/50"
             />
-            {username && username.trim().length < 2 && (
+            {userName && userName.trim().length < 2 && (
               <p className="text-xs text-red-500 mt-1">
                 이름은 2자 이상 입력해주세요
               </p>
@@ -234,7 +234,7 @@ export default function SignupModal({
           </button>
         </form>
         <p className="text-center text-sm text-gray-500 mt-4">
-          이미 계정이 있으신가요?{' '}
+          이미 계정이 있으신가요?
           <button
             type="button"
             onClick={() => {

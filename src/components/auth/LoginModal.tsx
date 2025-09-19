@@ -156,7 +156,7 @@ export default function LoginModal({
 
         {/* 하단 링크 (bottom-link) */}
         <p className="text-center text-sm text-gray-500">
-          아직 계정이 없으신가요?{' '}
+          아직 계정이 없으신가요?
           <button
             type="button"
             onClick={() => {
