@@ -53,11 +53,19 @@ export default function BookmarksPage() {
       const data = await BookmarkAPI.getBookmarks();
       setBookmarks(data);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : '북마크를 불러오는데 실패했습니다.',
-      );
+      const msg = err instanceof Error ? err.message : '북마크를 불러오는데 실패했습니다.';
+      if (msg.includes('로그인이 필요')) {
+        // 만료 토큰 정리 및 로그인 유도
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('userName');
+        setIsAuthed(false);
+        setUserName(undefined);
+        setBookmarks([]);
+        setLoginOpen(true);
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }

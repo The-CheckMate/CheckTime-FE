@@ -35,11 +35,17 @@ export default function BookmarkList() {
       const data = await BookmarkAPI.getBookmarks();
       setBookmarks(data);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : '북마크를 불러오는데 실패했습니다.',
-      );
+      const msg = err instanceof Error ? err.message : '북마크를 불러오는데 실패했습니다.';
+      if (msg.includes('로그인이 필요')) {
+        // 만료 토큰 정리 및 로그인 유도
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('userName');
+        // BookmarkList는 독립 컴포넌트이므로 상위에서 처리 필요
+        setError('로그인이 만료되었습니다. 다시 로그인해주세요.');
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
