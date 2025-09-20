@@ -109,7 +109,7 @@ export default function BookmarksPage() {
     try {
       await BookmarkAPI.clickBookmark(selectedBookmark.id);
       // 시간 확인 결과를 새 창에서 열기
-      window.open(`/result?url=${encodeURIComponent(selectedBookmark.custom_url)}`, '_blank');
+      window.open(`/search-result?url=${encodeURIComponent(selectedBookmark.custom_url)}`, '_blank');
       setConfirmOpen(false);
       setSelectedBookmark(null);
     } catch (err) {
