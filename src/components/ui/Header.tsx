@@ -67,7 +67,7 @@ export default function Header(props: HeaderProps) {
           >
             북마크
           </Link>
-          <Link href="#" className="hover:text-black transition-colors">
+          <Link href="/help" className="hover:text-black transition-colors">
             도움말
           </Link>
         </nav>
