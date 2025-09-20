@@ -152,14 +152,11 @@ export default function ServerTimeResult({
     }
 
     const absDiff = Math.abs(diff);
-    const direction = diff > 0 ? '' : '';
 
     if (absDiff < 1000) {
-      return `${direction}${diff.toFixed(2)}ms`;
+      return `${absDiff.toFixed(2)}밀리초`;
     } else {
-      return `${direction}${(diff / 1000).toFixed(2)}초 (±${(
-        absDiff / 1000
-      ).toFixed(2)}초)`;
+      return `${(absDiff / 1000).toFixed(2)}초`;
     }
   };
 
@@ -231,9 +228,7 @@ export default function ServerTimeResult({
                 <div className="font-medium">
                     타겟 서버가&nbsp;
                   <span className="font-bold">
-                    {getTimeDifferenceText(
-                      Math.abs(data.timeComparison.timeDifference),
-                    )}&nbsp;
+                    {getTimeDifferenceText(data.timeComparison.timeDifference)}&nbsp;
                   </span>
                   더&nbsp;
                   <span className="font-bold">
@@ -248,29 +243,6 @@ export default function ServerTimeResult({
           </div>
         )}
 
-      {/* 알람 카운트다운 컴포넌트 */}
-      {alarmData && (
-        <div className="mb-6">
-          <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                <Bell className="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <div className="text-sm font-medium text-gray-700">알람 설정됨</div>
-              </div>
-            </div>
-            <button
-              onClick={onAlarmDelete}
-              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-150"
-              title="알람 삭제"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          <AlarmCountdown alarm={alarmData} />
-        </div>
-      )}
 
       {/* 새로고침 버튼 */}
       <div className="text-center mb-8">
@@ -325,6 +297,38 @@ export default function ServerTimeResult({
           상세 정보
         </button>
       </div>
+
+      {/* 알람 카운트다운 컴포넌트 */}
+      {alarmData && (
+        <div className="mb-6">
+          <div className="bg-gradient-to-r from-slate-50 to-gray-50 border border-gray-200 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center">
+                  <Bell className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-800">알림 활성화</div>
+                  <div className="text-xs text-gray-500">
+                    목표시간: {new Date(alarmData.targetTime).toLocaleTimeString('ko-KR', { 
+                      hour: '2-digit', 
+                      minute: '2-digit', 
+                      second: '2-digit' 
+                    })} | 한국 표준시간
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={onAlarmDelete}
+                className="px-3 py-1.5 text-xs font-medium text-white bg-red-500 border border-red-500 rounded-md hover:bg-red-600 hover:border-red-600 transition-colors duration-150"
+              >
+                사용 안 함
+              </button>
+            </div>
+            <AlarmCountdown alarm={alarmData} />
+          </div>
+        </div>
+      )}
 
       {/* 상세 정보 모달 */}
       {showDetailModal && (
