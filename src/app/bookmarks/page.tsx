@@ -1,18 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Bookmark, BookmarkFormData } from '@/types/bookmark';
 import { BookmarkAPI } from '@/libs/api/bookmarks';
 import BookmarkItem from '@/components/bookmarks/BookmarkItem';
 import BookmarkModal from '@/components/bookmarks/BookmarkModal';
-import LoginModal from '@/components/auth/LoginModal';
-import SignupModal from '@/components/auth/SignupModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 
 export default function BookmarksPage() {
-  const router = useRouter();
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,13 +15,9 @@ export default function BookmarksPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Auth states
-  const [signupOpen, setSignupOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
-  const [userName, setUserName] = useState<string | undefined>(undefined);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedBookmark, setSelectedBookmark] = useState<Bookmark | null>(null);
-  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
   // 모달 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,10 +27,8 @@ export default function BookmarksPage() {
   // 새로고침 시에도 로그인 유지
   useEffect(() => {
     const at = localStorage.getItem('accessToken');
-    const name = localStorage.getItem('userName') || undefined;
     if (at) {
       setIsAuthed(true);
-      setUserName(name);
       loadBookmarks();
     } else {
       setLoading(false);
@@ -60,9 +49,8 @@ export default function BookmarksPage() {
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('userName');
         setIsAuthed(false);
-        setUserName(undefined);
         setBookmarks([]);
-        setLoginOpen(true);
+        alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
       } else {
         setError(msg);
       }
@@ -83,7 +71,7 @@ export default function BookmarksPage() {
   // 북마크 추가
   const handleAdd = () => {
     if (!isAuthed) {
-      setLoginOpen(true);
+      alert('로그인이 필요합니다.');
       return;
     }
     setEditingBookmark(undefined);
@@ -156,17 +144,6 @@ export default function BookmarksPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('userName');
-    setIsAuthed(false);
-    setUserName(undefined);
-    setLogoutConfirmOpen(false);
-    setBookmarks([]);
-    alert('로그아웃 되었습니다.');
-    router.push('/');
-  };
 
   if (loading) {
     return (
@@ -178,74 +155,6 @@ export default function BookmarksPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 헤더 */}
-      <header className="bg-white/80 backdrop-blur-xl border-b border-black/5 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
-          <Link href="/" className="flex items-center gap-2 text-black font-semibold text-base no-underline">
-            <div className="w-7 h-7 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-md flex items-center justify-center text-white text-sm">
-              ⏰
-            </div>
-            Check Time
-          </Link>
-          
-          <nav className="flex items-center gap-8">
-            <a
-              href="/ranking"
-              className="text-gray-600 text-sm font-medium hover:text-black transition-colors no-underline"
-            >
-              실시간 랭킹
-            </a>
-            <a
-              href="/reaction-test"
-              className="text-gray-600 text-sm font-medium hover:text-black transition-colors no-underline"
-            >
-              반응속도 게임
-            </a>
-            <a
-              href="/bookmarks"
-              className="text-black text-sm font-semibold no-underline"
-            >
-              북마크
-            </a>
-            <a
-              href="/help"
-              className="text-gray-600 text-sm font-medium hover:text-black transition-colors no-underline"
-            >
-              도움말
-            </a>
-          </nav>
-          
-          <div className="flex items-center gap-3">
-            {isAuthed ? (
-              <>
-                <span className="text-sm text-gray-600">안녕하세요, {userName}님</span>
-                <button
-                  onClick={() => setLogoutConfirmOpen(true)}
-                  className="px-4 py-2 text-gray-600 text-sm font-medium rounded-md hover:text-black hover:bg-black/5 transition-all"
-                >
-                  로그아웃
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => setLoginOpen(true)}
-                  className="px-4 py-2 text-gray-600 text-sm font-medium rounded-md hover:text-black hover:bg-black/5 transition-all"
-                >
-                  로그인
-                </button>
-                <button
-                  onClick={() => setSignupOpen(true)}
-                  className="px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-black/80 transition-all"
-                >
-                  회원가입
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
       {/* 메인 컨텐츠 */}
       <main className="max-w-7xl mx-auto px-6 py-10">
         {/* 컨트롤 바 */}
@@ -302,20 +211,6 @@ export default function BookmarksPage() {
                 로그인이 필요합니다
               </h3>
               <p className="text-gray-600 mb-4">북마크 기능을 사용하려면 로그인해주세요</p>
-              <div className="flex gap-3 justify-center">
-                <button
-                  onClick={() => setLoginOpen(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  로그인
-                </button>
-                <button
-                  onClick={() => setSignupOpen(true)}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
-                >
-                  회원가입
-                </button>
-              </div>
             </div>
           ) : error ? (
             <div className="text-center py-12">
@@ -366,79 +261,6 @@ export default function BookmarksPage() {
         isLoading={modalLoading}
       />
 
-      {/* 로그인 모달 */}
-      <LoginModal
-        open={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onSignupClick={() => {
-          setLoginOpen(false);
-          setSignupOpen(true);
-        }}
-        onSubmit={async ({ email, password }) => {
-          try {
-            const res = await fetch(
-              `${process.env.NEXT_PUBLIC_API_BASE}/api/auth/login`,
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-              },
-            );
-
-            const data = await res.json();
-
-            if (!res.ok) throw new Error(data.error || '로그인 실패');
-
-            localStorage.setItem('accessToken', data.data.accessToken);
-            localStorage.setItem('refreshToken', data.data.refreshToken);
-            if (data?.data?.user?.username) {
-              localStorage.setItem('userName', data.data.user.username);
-              setUserName(data.data.user.username);
-            }
-            setIsAuthed(true);
-            setLoginOpen(false);
-            loadBookmarks();
-            return true;
-          } catch (err) {
-            alert(err instanceof Error ? err.message : '로그인 중 오류 발생');
-            return false;
-          }
-        }}
-      />
-
-      {/* 회원가입 모달 */}
-      <SignupModal
-        open={signupOpen}
-        onClose={() => setSignupOpen(false)}
-        onLoginClick={() => {
-          setSignupOpen(false);
-          setLoginOpen(true);
-        }}
-        onSubmit={async ({ username, email, password }) => {
-          try {
-            const res = await fetch(
-              `${process.env.NEXT_PUBLIC_API_BASE}/api/auth/register`,
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password }),
-              },
-            );
-            const data = await res.json();
-
-            if (!res.ok) {
-              throw new Error(data.error || '회원가입 실패');
-            }
-
-            console.log('회원가입 성공', data.data.user);
-            alert('회원가입이 완료되었습니다. 로그인 해주세요.');
-            setSignupOpen(false);
-            setLoginOpen(true);
-          } catch (err) {
-            alert(err instanceof Error ? err.message : '회원가입 중 오류 발생');
-          }
-        }}
-      />
 
       {/* 시간확인 확인 모달 */}
       <ConfirmModal
@@ -454,16 +276,6 @@ export default function BookmarksPage() {
         }}
       />
 
-      {/* 로그아웃 확인 모달 */}
-      <ConfirmModal
-        open={logoutConfirmOpen}
-        title="로그아웃 확인"
-        message="정말 로그아웃하시겠습니까?"
-        confirmText="로그아웃"
-        cancelText="취소"
-        onConfirm={handleLogout}
-        onClose={() => setLogoutConfirmOpen(false)}
-      />
     </div>
   );
 }
