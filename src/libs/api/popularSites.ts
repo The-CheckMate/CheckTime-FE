@@ -1,5 +1,5 @@
 export interface Site {
-  id: number;
+  site_id: number;
   name: string;
   url: string;
   category: string;

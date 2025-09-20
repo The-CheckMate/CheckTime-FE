@@ -149,7 +149,7 @@ export default function RankingPage() {
               <ol style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {sites.map((site, index) => (
                   <li
-                    key={site.id}
+                    key={site.site_id}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
