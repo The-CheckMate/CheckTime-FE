@@ -100,7 +100,7 @@ export default function Page() {
       : '결과 없음';
 
   return (
-    <div className="min-h-[calc(100dvh-64px)] px-4 py-8">
+    <div className="min-h-screen px-4 py-8">
       <div className="mx-auto max-w-6xl">
         <header className="mb-6">
           <h1 className="text-2xl font-bold">반응속도 테스트</h1>
