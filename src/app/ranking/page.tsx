@@ -26,7 +26,7 @@ export default function RankingPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const categories = ['전체', '티켓팅', '대학교'];
+  const categories = ['전체', '티켓팅', '대학'];
 
   const fetchSites = useCallback(async () => {
     setLoading(true);
@@ -149,7 +149,7 @@ export default function RankingPage() {
               <ol style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {sites.map((site, index) => (
                   <li
-                    key={site.site_id}
+                    key={`site-${site.site_id}-${index}`}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
