@@ -11,7 +11,7 @@ export default function ClientHeader() {
   const router = useRouter();
 
   const pathname = usePathname();
-  const HIDE_ON = ['/bookmarks'];
+  const HIDE_ON: string[] = [];
   const hideHeader = HIDE_ON.some(
     (p) => pathname === p || pathname.startsWith(p + '/'),
   );
