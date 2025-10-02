@@ -42,6 +42,8 @@ export default function AlarmCountdown({
   const [alertMessages, setAlertMessages] = useState<string[]>([]);
   const [hasCalculated, setHasCalculated] = useState(false);
   const [showCountdown, setShowCountdown] = useState(true);
+  const [showAlertTime, setShowAlertTime] = useState(false);
+  const [showRefreshMessage, setShowRefreshMessage] = useState(false);
 
   // Interval 계산 API 호출
   const calculateInterval = async (targetUrl: string, targetTime: string, userAlertOffsets: number[]) => {
@@ -86,7 +88,7 @@ export default function AlarmCountdown({
       if (timeUntilOptimal <= 0 && timeUntilOptimal >= -1) {
         console.log('🔔 optimalRefreshTime 도달: 지금 새로고침하세요!');
         
-        setAlertMessages(['지금 새로고침하세요!']);
+        setShowRefreshMessage(true); // "지금 새로고침하세요!" 표시
         setShowCountdown(false); // 카운트다운 숨김
         
         // 브라우저 알림 (사용자 허용 시)
@@ -158,7 +160,7 @@ export default function AlarmCountdown({
         }
       } else if (!alarm.options.useIntervalCalculation) {
         // 기본 알림 스케줄링
-        scheduleDefaultAlerts(alarm.options.preAlerts, seconds);
+        scheduleDefaultAlerts(alarm.options.preAlerts);
       }
 
       const interval = setInterval(() => {
@@ -168,11 +170,31 @@ export default function AlarmCountdown({
         // 알림 메시지 체크
         checkAlertMessages();
         
+        // 기본 알림 모드: 사전 알림 시간에 도달했을 때 체크
+        if (!alarm.options.useIntervalCalculation && alarm.options.preAlerts.length > 0) {
+          alarm.options.preAlerts.forEach((alertSeconds) => {
+            if (seconds === alertSeconds) {
+              console.log(`🔔 ${alertSeconds}초 전 알림 도달`);
+              setShowCountdown(false); // 카운트다운 숨김
+              setShowAlertTime(true); // 알림 시간 메시지 표시
+              setRemainingSeconds(0);
+              // onComplete 호출하지 않고 여기서 멈춤
+            }
+          });
+        }
+        
         // 카운트다운은 항상 목표 시간까지 계속 진행
         if (seconds <= 0) {
           clearInterval(interval);
           setRemainingSeconds(0);
-          onComplete?.();
+          
+          // 기본 알림 모드에서 사전 알림이 없을 때도 "알림 시간입니다!" 표시
+          if (!alarm.options.useIntervalCalculation) {
+            setShowCountdown(false);
+            setShowAlertTime(true);
+          } else {
+            onComplete?.();
+          }
         }
       }, 1000);
 
@@ -190,16 +212,24 @@ export default function AlarmCountdown({
   };
 
   // 기본 알림 스케줄링
-  const scheduleDefaultAlerts = (preAlerts: number[], totalSeconds: number) => {
+  const scheduleDefaultAlerts = (preAlerts: number[]) => {
+    // 기본 알림 메시지 생성
     const alerts: string[] = [];
     
     preAlerts.forEach((alertSeconds) => {
-      if (alertSeconds <= totalSeconds) {
+      if (alertSeconds === 60) {
+        alerts.push('1분 전 알림');
+      } else if (alertSeconds === 30) {
+        alerts.push('30초 전 알림');
+      } else if (alertSeconds === 10) {
+        alerts.push('10초 전 알림');
+      } else {
         alerts.push(`${alertSeconds}초 전 알림`);
       }
     });
     
     setAlertMessages(alerts);
+    console.log('🎯 기본 알림 스케줄링:', alerts);
   };
 
   return (
@@ -217,25 +247,36 @@ export default function AlarmCountdown({
 
         {/* 카운트다운 타이머 */}
         {showCountdown && (
-          <div className="text-4xl font-bold tracking-widest">
+          <div className="text-4xl font-bold tracking-widest text-black">
             {remainingSeconds !== null
               ? remainingSeconds > 0
                 ? formatTime(remainingSeconds)
                 : alarm.options.useIntervalCalculation
                   ? '' // Interval 옵션 사용자는 목표 시간에 도달해도 메시지 표시 안함
-                  : '⏰ 알림 시간입니다!'
+                  : ''
               : '대기 중...'}
+          </div>
+        )}
+
+        {/* 기본 알림 모드: 사전 알림 시간 도달 시 메시지 표시 */}
+        {!alarm.options.useIntervalCalculation && showAlertTime && (
+          <div className="text-4xl font-bold tracking-widest text-red-600">
+            알림 시간입니다!
+          </div>
+        )}
+
+        {/* Interval 모드: optimalRefreshTime 도달 시 메시지 표시 */}
+        {alarm.options.useIntervalCalculation && showRefreshMessage && (
+          <div className="text-4xl font-bold tracking-widest text-red-600">
+            지금 새로고침하세요!
           </div>
         )}
 
         {/* 알림 메시지 */}
         {alertMessages.length > 0 && (
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 text-xs text-gray-600">
             {alertMessages.map((message, index) => (
-              <div
-                key={index}
-                className="text-sm"
-              >
+              <div key={index}>
                 {message}
               </div>
             ))}

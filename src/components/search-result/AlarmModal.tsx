@@ -102,7 +102,7 @@ export default function AlarmModal({ onConfirm, onClose, finalUrl }: AlarmModalP
 
   const [options, setOptions] = useState<AlarmOptions>({
     preAlerts: [],
-    sound: true,
+    sound: false,
     red: false,
     useIntervalCalculation: false,
     targetUrl: '',
@@ -180,7 +180,7 @@ export default function AlarmModal({ onConfirm, onClose, finalUrl }: AlarmModalP
         {/* 시간 설정 */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-3 ">
-            알림 받을 시간
+            목표 시간
           </label>
           <div className="flex items-center gap-2">
             <select
