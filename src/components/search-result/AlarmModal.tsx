@@ -13,6 +13,9 @@ export interface AlarmOptions {
   preAlerts: number[]; // [60, 30, 10]
   sound: boolean;
   red: boolean;
+  useIntervalCalculation: boolean; // interval 계산 사용 여부
+  targetUrl: string; // interval 계산용 URL
+  customAlertOffsets: number[]; // 사용자 정의 알림 오프셋
 }
 
 export interface AlarmData {
@@ -24,6 +27,7 @@ export interface AlarmData {
 interface AlarmModalProps {
   onConfirm: (data: AlarmData) => void;
   onClose: () => void;
+  finalUrl?: string; // 검색 결과의 최종 URL
 }
 
 // 시간 옵션 생성
@@ -91,15 +95,18 @@ function Checkbox({
   );
 }
 
-export default function AlarmModal({ onConfirm, onClose }: AlarmModalProps) {
+export default function AlarmModal({ onConfirm, onClose, finalUrl }: AlarmModalProps) {
   const [hour, setHour] = useState('00');
   const [minute, setMinute] = useState('00');
   const [second, setSecond] = useState('00');
 
   const [options, setOptions] = useState<AlarmOptions>({
     preAlerts: [],
-    sound: true,
+    sound: false,
     red: false,
+    useIntervalCalculation: false,
+    targetUrl: '',
+    customAlertOffsets: [],
   });
 
   const togglePreAlert = (secondsBefore: number) => {
@@ -111,9 +118,11 @@ export default function AlarmModal({ onConfirm, onClose }: AlarmModalProps) {
     }));
   };
 
-  const handleToggle = (key: 'sound' | 'red') => {
+  const handleToggle = (key: 'sound' | 'red' | 'useIntervalCalculation') => {
     setOptions((prev) => ({ ...prev, [key]: !prev[key] }));
   };
+
+
 
   const handleSubmit = () => {
     const now = new Date();
@@ -128,6 +137,12 @@ export default function AlarmModal({ onConfirm, onClose }: AlarmModalProps) {
 
     if (timeUntilTarget < 0) {
       alert('❗ 이미 지난 시간입니다. 다시 설정해 주세요.');
+      return;
+    }
+
+    // Interval 계산 사용 시 finalUrl 검증
+    if (options.useIntervalCalculation && !finalUrl) {
+      alert('❗ Interval 계산을 사용하려면 검색 결과 URL이 필요합니다.');
       return;
     }
 
@@ -165,7 +180,7 @@ export default function AlarmModal({ onConfirm, onClose }: AlarmModalProps) {
         {/* 시간 설정 */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-3 ">
-            알림 받을 시간
+            목표 시간
           </label>
           <div className="flex items-center gap-2">
             <select
@@ -207,7 +222,7 @@ export default function AlarmModal({ onConfirm, onClose }: AlarmModalProps) {
         </div>
 
         {/* 사전 알림 설정 */}
-        <div className="mb-6">
+        <div className={`mb-6 ${options.useIntervalCalculation ? 'opacity-50 pointer-events-none' : ''}`}>
           <label className="block text-sm font-medium text-gray-700 mb-3">
             사전 알림
           </label>
@@ -249,6 +264,24 @@ export default function AlarmModal({ onConfirm, onClose }: AlarmModalProps) {
               checked={options.red}
               onChange={() => handleToggle('red')}
               label="빨간색 강조"
+            />
+          </div>
+        </div>
+
+        {/* 고급 설정 - Interval 계산 */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            고급 설정
+          </label>
+          <div className="space-y-4">
+            <ToggleSwitch
+              checked={options.useIntervalCalculation}
+              onChange={() => handleToggle('useIntervalCalculation')}
+              label={
+                <div className="flex items-center gap-2">
+                  Interval 계산
+                </div>
+              }
             />
           </div>
         </div>
