@@ -282,21 +282,14 @@ export default function ServerTimeResult({
 
           {/* 알림 모달 */}
           {showAlarmModal && (
-            <AlarmModal onConfirm={onAlarmConfirm} onClose={handleAlarmClose} />
+            <AlarmModal 
+              onConfirm={onAlarmConfirm} 
+              onClose={handleAlarmClose} 
+              finalUrl={data.url}
+            />
           )}
         </div>
       )}
-
-      {/* 상세 정보 버튼 */}
-      <div className="text-center">
-        <button
-          onClick={() => setShowDetailModal(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-gray-500 hover:text-gray-700 transition-colors duration-150 text-xs font-medium"
-        >
-          <Info className="w-3 h-3" />
-          상세 정보
-        </button>
-      </div>
 
       {/* 알람 카운트다운 컴포넌트 */}
       {alarmData && (
@@ -314,7 +307,7 @@ export default function ServerTimeResult({
                       hour: '2-digit', 
                       minute: '2-digit', 
                       second: '2-digit' 
-                    })} | 한국 표준시간
+                    })}
                   </div>
                 </div>
               </div>
@@ -325,10 +318,21 @@ export default function ServerTimeResult({
                 사용 안 함
               </button>
             </div>
-            <AlarmCountdown alarm={alarmData} />
+            <AlarmCountdown alarm={alarmData} finalUrl={data.url} />
           </div>
         </div>
       )}
+
+      {/* 상세 정보 버튼 */}
+      <div className="text-center">
+        <button
+          onClick={() => setShowDetailModal(true)}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-gray-500 hover:text-gray-700 transition-colors duration-150 text-xs font-medium"
+        >
+          <Info className="w-3 h-3" />
+          상세 정보
+        </button>
+      </div>
 
       {/* 상세 정보 모달 */}
       {showDetailModal && (
