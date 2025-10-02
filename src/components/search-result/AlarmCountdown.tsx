@@ -44,6 +44,58 @@ export default function AlarmCountdown({
   const [showCountdown, setShowCountdown] = useState(true);
   const [showAlertTime, setShowAlertTime] = useState(false);
   const [showRefreshMessage, setShowRefreshMessage] = useState(false);
+  const [hasPlayedSound, setHasPlayedSound] = useState(false);
+
+  // 빨간색 배경 효과 (전체 화면)
+  useEffect(() => {
+    if (alarm.options.red && (showAlertTime || showRefreshMessage)) {
+      // 전체 화면을 빨간색으로 변경
+      document.body.style.backgroundColor = '#ef4444'; // bg-red-500
+      document.body.style.transition = 'background-color 0.3s ease';
+    } else {
+      // 원래 배경색으로 복원
+      document.body.style.backgroundColor = '';
+      document.body.style.transition = 'background-color 0.3s ease';
+    }
+
+    // 컴포넌트 언마운트 시 원래 배경색으로 복원
+    return () => {
+      document.body.style.backgroundColor = '';
+      document.body.style.transition = '';
+    };
+  }, [alarm.options.red, showAlertTime, showRefreshMessage]);
+
+  // 소리 재생 함수 (5초간 삡 소리)
+  const playAlarmSound = () => {
+    if (!alarm.options.sound) return;
+    
+    // AudioContext를 사용하여 삡 소리 생성
+    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const audioContext = new AudioContextClass();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime); // 800Hz 삡 소리
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 5); // 5초간 감소
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 5);
+  };
+
+  // 메시지 표시 시 소리 재생
+  useEffect(() => {
+    if ((showAlertTime || showRefreshMessage) && !hasPlayedSound) {
+      playAlarmSound();
+      setHasPlayedSound(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAlertTime, showRefreshMessage, hasPlayedSound]);
 
   // Interval 계산 API 호출
   const calculateInterval = async (targetUrl: string, targetTime: string, userAlertOffsets: number[]) => {
@@ -78,7 +130,7 @@ export default function AlarmCountdown({
 
   // 알림 메시지 체크
   const checkAlertMessages = useCallback(() => {
-    if (intervalResult?.data?.optimalRefreshTime) {
+    if (intervalResult?.data?.optimalRefreshTime && !hasPlayedSound && !showRefreshMessage) {
       // optimalRefreshTime을 기준으로 정확한 시점 계산
       const optimalTime = new Date(intervalResult.data.optimalRefreshTime);
       const now = new Date();
@@ -90,19 +142,10 @@ export default function AlarmCountdown({
         
         setShowRefreshMessage(true); // "지금 새로고침하세요!" 표시
         setShowCountdown(false); // 카운트다운 숨김
-        
-        // 브라우저 알림 (사용자 허용 시)
-        if (alarm.options.sound && 'Notification' in window) {
-          if (Notification.permission === 'granted') {
-            new Notification('CheckTime 알림', {
-              body: '지금 새로고침하세요!',
-              icon: '/favicon.ico'
-            });
-          }
-        }
+        // 소리는 useEffect에서 재생
       }
     }
-  }, [intervalResult, alarm.options.sound]);
+  }, [intervalResult, hasPlayedSound, showRefreshMessage]);
 
   // 남은 시간을 HH:MM:SS로 포맷팅
   const formatTime = (totalSeconds: number) => {
@@ -178,6 +221,7 @@ export default function AlarmCountdown({
               setShowCountdown(false); // 카운트다운 숨김
               setShowAlertTime(true); // 알림 시간 메시지 표시
               setRemainingSeconds(0);
+              // 소리는 여기서 재생하지 않음 - 메시지 표시 시에만 재생
               // onComplete 호출하지 않고 여기서 멈춤
             }
           });
@@ -192,6 +236,7 @@ export default function AlarmCountdown({
           if (!alarm.options.useIntervalCalculation) {
             setShowCountdown(false);
             setShowAlertTime(true);
+            // 소리는 useEffect에서 재생
           } else {
             onComplete?.();
           }
@@ -202,7 +247,7 @@ export default function AlarmCountdown({
     };
 
     initializeCountdown();
-  }, [alarm, onComplete, finalUrl, checkAlertMessages, hasCalculated]);
+  }, [alarm, onComplete, finalUrl, checkAlertMessages, hasCalculated, playAlarmSound]);
 
   // Interval 계산 결과에 따른 알림 스케줄링
   const scheduleIntervalAlerts = () => {
