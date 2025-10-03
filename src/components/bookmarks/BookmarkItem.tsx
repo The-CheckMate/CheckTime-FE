@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { Bookmark } from '@/types/bookmark';
 
 interface BookmarkItemProps {
@@ -40,9 +41,11 @@ export default function BookmarkItem({
             className="w-12 h-12 rounded-lg flex items-center justify-center text-xl text-white flex-shrink-0"
           >
             {bookmark.favicon && faviconUrl ? (
-              <img 
+              <Image 
                 src={faviconUrl} 
                 alt={bookmark.custom_name}
+                width={32}
+                height={32}
                 className="w-8 h-8 rounded"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
@@ -102,9 +105,11 @@ export default function BookmarkItem({
         className="w-12 h-12 rounded-lg mx-auto mb-4 flex items-center justify-center text-xl text-white"
       >
         {bookmark.favicon && faviconUrl ? (
-          <img 
+          <Image 
             src={faviconUrl} 
             alt={bookmark.custom_name}
+            width={32}
+            height={32}
             className="w-8 h-8 rounded"
             onError={(e) => {
               e.currentTarget.style.display = 'none';

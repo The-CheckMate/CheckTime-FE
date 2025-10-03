@@ -92,7 +92,7 @@ export default function BookmarkModal({
     if (!validateForm()) return;
 
     try {
-      const submitData: any = {
+      const submitData: Omit<BookmarkFormData, 'favicon'> = {
         custom_name: formData.custom_name.trim(),
         custom_url: formData.custom_url.trim(),
         // favicon 필드는 전송하지 않음 (백엔드에서 자동 처리)

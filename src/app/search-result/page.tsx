@@ -1,7 +1,7 @@
 // 검색 결과 및 알림 화면
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { AlarmData } from '@/components/search-result/AlarmModal';
 import { useSearchParams } from 'next/navigation';
 import KoreanStandardTime from '@/components/search-result/KoreanStandardTime';
@@ -30,7 +30,7 @@ import { SiteAPI } from '@/libs/api/sites';
 
 
 
-export default function CheckTimeApp() {
+function CheckTimeAppContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [serverTimeData, setServerTimeData] = useState<ServerTimeData | null>(
     null,
@@ -216,5 +216,20 @@ export default function CheckTimeApp() {
       {/* 한국 표준시 */}
       <KoreanStandardTime showMilliseconds={showMilliseconds} />
     </div>
+  );
+}
+
+export default function CheckTimeApp() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen px-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <span className="text-gray-600">로딩 중...</span>
+        </div>
+      </div>
+    }>
+      <CheckTimeAppContent />
+    </Suspense>
   );
 }

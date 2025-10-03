@@ -66,7 +66,7 @@ export default function AlarmCountdown({
   }, [alarm.options.red, showAlertTime, showRefreshMessage]);
 
   // 소리 재생 함수 (5초간 삡 소리)
-  const playAlarmSound = () => {
+  const playAlarmSound = useCallback(() => {
     if (!alarm.options.sound) return;
     
     // AudioContext를 사용하여 삡 소리 생성
@@ -86,7 +86,7 @@ export default function AlarmCountdown({
     
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 5);
-  };
+  }, [alarm.options.sound]);
 
   // 메시지 표시 시 소리 재생
   useEffect(() => {
@@ -247,7 +247,7 @@ export default function AlarmCountdown({
     };
 
     initializeCountdown();
-  }, [alarm, onComplete, finalUrl, checkAlertMessages, hasCalculated, playAlarmSound]);
+  }, [alarm, onComplete, finalUrl, checkAlertMessages, hasCalculated]);
 
   // Interval 계산 결과에 따른 알림 스케줄링
   const scheduleIntervalAlerts = () => {
