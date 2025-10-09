@@ -66,7 +66,9 @@ export default function ClientHeader() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '로그인 실패');
 
-      localStorage.setItem('accessToken', data.data.accessToken);
+      // AuthUtils를 사용하여 토큰 저장
+      AuthUtils.setToken(data.data.accessToken);
+
       localStorage.setItem('refreshToken', data.data.refreshToken);
       if (data?.data?.user?.username) {
         localStorage.setItem('userName', data.data.user.username);
@@ -113,9 +115,9 @@ export default function ClientHeader() {
 
   // 로그아웃
   function handleLogout() {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('userName');
+    // AuthUtils를 사용하여 한번에 토큰 삭제
+    AuthUtils.removeToken();
+
     setIsAuthed(false);
     setUserName(undefined);
     setConfirmOpen(false);
