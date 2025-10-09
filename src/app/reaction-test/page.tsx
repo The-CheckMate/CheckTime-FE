@@ -291,7 +291,7 @@ export default function Page() {
               )}
             </div>
 
-            {/* 'TOP 10' 랭킹 보드 */}
+            {/* 'TOP 10' 랭킹 보드
             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
               <h3 className="mb-4 flex items-center gap-2 font-semibold">
                 <span>🏆 TOP 10</span>
@@ -322,7 +322,7 @@ export default function Page() {
                   랭킹 정보가 없습니다.
                 </p>
               )}
-            </div>
+            </div> */}
           </aside>
         </div>
       </div>
