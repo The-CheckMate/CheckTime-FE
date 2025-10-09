@@ -12,7 +12,6 @@ type Phase = 'idle' | 'ready' | 'go' | 'tooSoon' | 'result';
 // 단일 모드: 0.5s ~ 5s
 const DELAY_RANGE: [number, number] = [500, 5000];
 
-// 상위 10위권 엔트리 타입
 // interface RankEntry {
 //   user_id: number;
 //   username: string;
