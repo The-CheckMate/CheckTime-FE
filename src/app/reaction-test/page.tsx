@@ -50,7 +50,7 @@ export default function Page() {
     try {
       const [top10Res, nearbyRes] = await Promise.all([
         getTop10Rankings(),
-        getNearbyRankings(),
+        getNearbyRankings(5), // 내 주변 5명 조회
       ]);
 
       if (top10Res.success) {
