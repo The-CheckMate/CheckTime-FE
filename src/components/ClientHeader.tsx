@@ -6,7 +6,6 @@ import LoginModal from './auth/LoginModal';
 import SignupModal from './auth/SignupModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { usePathname, useRouter } from 'next/navigation';
-import { AuthUtils } from '@/libs/auth';
 
 export default function ClientHeader() {
   const router = useRouter();
@@ -28,10 +27,11 @@ export default function ClientHeader() {
 
   // 새로고침 시에도 로그인 유지
   useEffect(() => {
-    // AuthUtils를 사용해서 토큰 유무 확인
-    if (AuthUtils.hasToken()) {
+    const at = localStorage.getItem('accessToken');
+    const name = localStorage.getItem('userName') || undefined;
+    if (at) {
       setIsAuthed(true);
-      setUserName(localStorage.getItem('userName') || undefined);
+      setUserName(name);
     }
 
     // 탭 간 동기화: 다른 탭에서 로그아웃 시 반영
@@ -55,17 +55,18 @@ export default function ClientHeader() {
     password: string;
   }) {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE}/api/auth/login`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        },
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '로그인 실패');
 
-      // AuthUtils를 사용하여 토큰 저장
-      AuthUtils.setToken(data.data.accessToken);
-
+      localStorage.setItem('accessToken', data.data.accessToken);
       localStorage.setItem('refreshToken', data.data.refreshToken);
       if (data?.data?.user?.username) {
         localStorage.setItem('userName', data.data.user.username);
@@ -91,7 +92,7 @@ export default function ClientHeader() {
   }) {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
+        `${process.env.NEXT_PUBLIC_API_BASE}/api/auth/register`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -112,9 +113,9 @@ export default function ClientHeader() {
 
   // 로그아웃
   function handleLogout() {
-    // AuthUtils를 사용하여 한번에 토큰 삭제
-    AuthUtils.removeToken();
-
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userName');
     setIsAuthed(false);
     setUserName(undefined);
     setConfirmOpen(false);
