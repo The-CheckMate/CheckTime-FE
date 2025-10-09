@@ -6,6 +6,7 @@ import LoginModal from './auth/LoginModal';
 import SignupModal from './auth/SignupModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { usePathname, useRouter } from 'next/navigation';
+import { AuthUtils } from '@/libs/auth';
 
 export default function ClientHeader() {
   const router = useRouter();
@@ -27,11 +28,10 @@ export default function ClientHeader() {
 
   // 새로고침 시에도 로그인 유지
   useEffect(() => {
-    const at = localStorage.getItem('accessToken');
-    const name = localStorage.getItem('userName') || undefined;
-    if (at) {
+    // AuthUtils를 사용해서 토큰 유무 확인
+    if (AuthUtils.hasToken()) {
       setIsAuthed(true);
-      setUserName(name);
+      setUserName(localStorage.getItem('userName') || undefined);
     }
 
     // 탭 간 동기화: 다른 탭에서 로그아웃 시 반영
