@@ -12,12 +12,13 @@ type Phase = 'idle' | 'ready' | 'go' | 'tooSoon' | 'result';
 // 단일 모드: 0.5s ~ 5s
 const DELAY_RANGE: [number, number] = [500, 5000];
 
-interface RankEntry {
-  user_id: number;
-  username: string;
-  user_best_time: string;
-  rank: string;
-}
+// 상위 10위권 엔트리 타입
+// interface RankEntry {
+//   user_id: number;
+//   username: string;
+//   user_best_time: string;
+//   rank: string;
+// }
 interface NearbyRankEntry {
   user_id: number;
   username: string;
@@ -38,7 +39,7 @@ export default function Page() {
   const [records, setRecords] = useState<number[]>([]);
   const [current, setCurrent] = useState<number | null>(null);
 
-  const [topRankings, setTopRankings] = useState<RankEntry[]>([]);
+  //const [topRankings, setTopRankings] = useState<RankEntry[]>([]);
   const [nearbyRankings, setNearbyRankings] = useState<NearbyRankEntry[]>([]);
   const [myRankInfo, setMyRankInfo] = useState<MyRankInfo | null>(null);
 
@@ -54,7 +55,7 @@ export default function Page() {
       ]);
 
       if (top10Res.success) {
-        setTopRankings(top10Res.data.topRankings);
+        //setTopRankings(top10Res.data.topRankings);
       }
       if (nearbyRes.success) {
         setNearbyRankings(nearbyRes.rankings);
