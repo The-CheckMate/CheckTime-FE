@@ -34,9 +34,13 @@ export const saveReactionTimeRecord = (refreshTime: number) => {
 
 /**
  * 내 주변 순위 정보를 가져옵니다.
+ * @param range 조회할 순위 범위
  */
-export const getNearbyRankings = () => {
-  return fetchApi('/refresh-records/nearby', {
+export const getNearbyRankings = (range: number) => {
+  alert(`getNearbyRankings 함수 실행! Range: ${range}`); // 👈 이 줄을 추가!
+
+  // 템플릿 리터럴을 사용해 range 쿼리 파라미터를 추가합니다.
+  return fetchApi(`/refresh-records/nearby?range=${range}`, {
     method: 'GET',
   });
 };
