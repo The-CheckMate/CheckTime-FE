@@ -1,29 +1,67 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  getTop10Rankings,
+  getMyRank,
+  saveReactionTimeRecord,
+} from '@/libs/api/reactionRanking';
 
 type Phase = 'idle' | 'ready' | 'go' | 'tooSoon' | 'result';
 
 // 단일 모드: 0.5s ~ 5s
 const DELAY_RANGE: [number, number] = [500, 5000];
 
+// TOP 10 랭킹 항목 타입
+interface RankEntry {
+  user_id: number;
+  username: string;
+  user_best_time: string;
+  rank: string;
+}
+
+// 내 랭킹 정보 타입
+interface MyRankInfo {
+  user_id: number;
+  username: string;
+  user_best_time: string;
+  best_rank: string;
+}
+
 export default function Page() {
   const [phase, setPhase] = useState<Phase>('idle');
   const [records, setRecords] = useState<number[]>([]);
   const [current, setCurrent] = useState<number | null>(null);
-  const [best, setBest] = useState<number | null>(null);
+
+  const [topRankings, setTopRankings] = useState<RankEntry[]>([]);
+  const [myRankInfo, setMyRankInfo] = useState<MyRankInfo | null>(null);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTsRef = useRef<number | null>(null);
 
-  // 최고 기록 로컬 저장
+  // 랭킹 데이터를 불러오는 함수 (두 API를 동시에 호출)
+  const fetchAllRankings = async () => {
+    try {
+      const [top10Res, myRankRes] = await Promise.all([
+        getTop10Rankings(),
+        getMyRank(),
+      ]);
+
+      if (top10Res.success) {
+        setTopRankings(top10Res.data.topRankings);
+      }
+      if (myRankRes.success) {
+        setMyRankInfo(myRankRes.rank);
+      }
+    } catch (error) {
+      console.error('랭킹 정보를 불러오는데 실패했습니다:', error);
+    }
+  };
+
+  // 페이지가 처음 로드될 때 랭킹 정보를 불러옵니다.
   useEffect(() => {
-    const saved = localStorage.getItem('reaction-best-ms');
-    if (saved) setBest(Number(saved));
+    fetchAllRankings();
   }, []);
-  useEffect(() => {
-    if (best != null) localStorage.setItem('reaction-best-ms', String(best));
-  }, [best]);
 
   // 평균
   const average = useMemo(() => {
@@ -33,10 +71,7 @@ export default function Page() {
   }, [records]);
 
   const resetWaitingTimer = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
+    if (timerRef.current) clearTimeout(timerRef.current);
   };
 
   const handleStart = () => {
@@ -54,7 +89,7 @@ export default function Page() {
     }, delay);
   };
 
-  const handleCircleClick = () => {
+  const handleCircleClick = async () => {
     if (phase === 'ready') {
       // 너무 빨리 클릭
       resetWaitingTimer();
@@ -66,9 +101,23 @@ export default function Page() {
       const rt = Math.round(performance.now() - startTsRef.current);
       setCurrent(rt);
       setRecords((prev) => [...prev, rt]);
-      setBest((prev) => (prev == null ? rt : Math.min(prev, rt)));
       setPhase('result');
       startTsRef.current = null;
+
+      // 측정 완료 후 서버에 기록 저장 및 랭킹 갱신
+      try {
+        const saveResult = await saveReactionTimeRecord(rt);
+        if (saveResult.success) {
+          console.log('기록이 저장되었습니다.');
+          if (saveResult.isNewBest) {
+            alert('🎉 새로운 최고 기록입니다!');
+          }
+          // 기록 저장 후 최신 랭킹 정보를 다시 불러오기
+          fetchAllRankings();
+        }
+      } catch (error) {
+        console.error('기록 저장에 실패했습니다:', error);
+      }
     }
   };
 
@@ -198,25 +247,73 @@ export default function Page() {
               </div>
             </div>
 
+            {/* '내 순위' 카드 */}
             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
               <h3 className="mb-3 flex items-center gap-2 font-semibold">
-                <span>🏆 최고 기록</span>
+                <span>📊 내 순위</span>
               </h3>
-              <div className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 p-4">
-                <div className="grid h-8 w-8 place-items-center rounded-full bg-indigo-100 text-indigo-600">
-                  ⓘ
+              {myRankInfo ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 bg-gray-50 p-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">
+                        최고 기록
+                      </p>
+                      <p className="text-lg font-bold">
+                        {Math.round(parseFloat(myRankInfo.user_best_time))} ms
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-gray-500">
+                        전체 순위
+                      </p>
+                      <p className="text-lg font-bold">
+                        #{myRankInfo.best_rank}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-center text-xs text-gray-400">
+                    {myRankInfo.username} 님
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium">
-                    {best != null ? `${best} ms` : '기록 없음'}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {best != null
-                      ? '세션/로컬 최저 기록'
-                      : '게임을 시작해보세요!'}
-                  </p>
+              ) : (
+                <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 text-center text-sm text-gray-500">
+                  아직 측정 기록이 없습니다.
                 </div>
-              </div>
+              )}
+            </div>
+
+            {/*'TOP 10' 랭킹 보드*/}
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+              <h3 className="mb-4 flex items-center gap-2 font-semibold">
+                <span>🏆 TOP 10</span>
+              </h3>
+              {topRankings.length > 0 ? (
+                <ul className="space-y-2">
+                  {topRankings.map((user) => (
+                    <li
+                      key={user.user_id}
+                      className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-2 text-sm"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="font-bold text-gray-600 w-6 text-center">
+                          {user.rank}
+                        </span>
+                        <span className="font-medium text-gray-800">
+                          {user.username}
+                        </span>
+                      </div>
+                      <span className="font-bold text-indigo-600">
+                        {Math.round(parseFloat(user.user_best_time))} ms
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-center text-gray-500">
+                  랭킹 정보가 없습니다.
+                </p>
+              )}
             </div>
           </aside>
         </div>
