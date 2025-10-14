@@ -16,7 +16,7 @@ export default function KoreanStandardTime({
 
     const fetchTime = async () => {
       try {
-        const apiPath = `/time/current`;
+        const apiPath = `api/time/current`;
         const base = process.env.NEXT_PUBLIC_API_URL;
         const url = base ? new URL(apiPath, base).toString() : apiPath;
 
