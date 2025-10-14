@@ -24,9 +24,9 @@ export const getPopularSites = async ({
   period,
   category,
 }: FetchParams): Promise<Site[]> => {
-  const BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE}/api/sites/popular/popular-sites`;
-  if (!process.env.NEXT_PUBLIC_API_BASE) {
-    throw new Error('환경변수 NEXT_PUBLIC_API_BASE가 설정되지 않았습니다.');
+  const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/sites/popular/popular-sites`;
+  if (!process.env.NEXT_PUBLIC_API_URL) {
+    throw new Error('환경변수 NEXT_PUBLIC_API_URL이 설정되지 않았습니다.');
   }
 
   const params = new URLSearchParams({

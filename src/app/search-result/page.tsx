@@ -6,7 +6,9 @@ import { AlarmData } from '@/components/search-result/AlarmModal';
 import { useSearchParams } from 'next/navigation';
 import KoreanStandardTime from '@/components/search-result/KoreanStandardTime';
 import ServerSearchForm from '@/components/search-result/ServerSearchForm';
-import ServerTimeResult, { ServerTimeData } from '@/components/search-result/ServerTimeResult';
+import ServerTimeResult, {
+  ServerTimeData,
+} from '@/components/search-result/ServerTimeResult';
 import { SiteAPI } from '@/libs/api/sites';
 
 // RTTResult와 RTTData 인터페이스는 api/network/rtt에서 사용되므로,
@@ -26,9 +28,6 @@ import { SiteAPI } from '@/libs/api/sites';
 //   packetLossRate: string;
 //   results: RTTResult[];
 // }
-
-
-
 
 function CheckTimeAppContent() {
   const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +60,6 @@ function CheckTimeAppContent() {
 
   // Site 인터페이스는 이미 import됨
 
-
   const handleSubmit = useCallback(async (input: string) => {
     setIsLoading(true);
     setServerTimeData(null);
@@ -76,7 +74,7 @@ function CheckTimeAppContent() {
       if (!isValidUrl(finalUrl)) {
         console.log(`키워드 검색 시작: "${finalUrl}"`);
         const searchResult = await SiteAPI.searchSites(finalUrl, true);
-        
+
         if (searchResult.results && searchResult.results.length > 0) {
           finalUrl = searchResult.results[0].url;
           console.log(`검색 성공: ${input} → ${finalUrl}`);
@@ -93,7 +91,7 @@ function CheckTimeAppContent() {
 
       // 1. /api/time/compare 엔드포인트 호출
       const compareResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE}/api/time/compare`,
+        `${process.env.NEXT_PUBLIC_API_URL}/time/compare`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -221,14 +219,16 @@ function CheckTimeAppContent() {
 
 export default function CheckTimeApp() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen px-4 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <span className="text-gray-600">로딩 중...</span>
+    <Suspense
+      fallback={
+        <div className="min-h-screen px-4 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <span className="text-gray-600">로딩 중...</span>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <CheckTimeAppContent />
     </Suspense>
   );

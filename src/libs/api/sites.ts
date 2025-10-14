@@ -1,6 +1,6 @@
 import { AuthUtils } from '@/libs/auth';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export interface Site {
   id: number;
@@ -52,7 +52,7 @@ export class SiteAPI {
   ): Promise<SiteSearchResult> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/sites/search?q=${encodeURIComponent(searchTerm)}&auto_discover=${autoDiscover}`,
+        `${API_BASE_URL}/sites/search?q=${encodeURIComponent(searchTerm)}&auto_discover=${autoDiscover}`,
         {
           headers: AuthUtils.getAuthHeaders(),
         }
@@ -105,7 +105,7 @@ export class SiteAPI {
     }
 
     const response = await fetch(
-      `${API_BASE_URL}/api/sites?${params.toString()}`,
+        `${API_BASE_URL}/sites?${params.toString()}`,
       {
         headers: AuthUtils.getAuthHeaders(),
       }

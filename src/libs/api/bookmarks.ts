@@ -5,12 +5,12 @@ import {
 } from '@/types/bookmark';
 import { AuthUtils } from '@/libs/auth';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export class BookmarkAPI {
   // 북마크 목록 조회
   static async getBookmarks(): Promise<Bookmark[]> {
-    const response = await fetch(`${API_BASE_URL}/api/bookmarks`, {
+    const response = await fetch(`${API_BASE_URL}/bookmarks`, {
       headers: AuthUtils.getAuthHeaders(),
     });
 
@@ -43,7 +43,7 @@ export class BookmarkAPI {
   static async createBookmark(data: BookmarkCreateRequest): Promise<Bookmark> {
     console.log('북마크 추가 요청 데이터:', data);
 
-    const response = await fetch(`${API_BASE_URL}/api/bookmarks`, {
+    const response = await fetch(`${API_BASE_URL}/bookmarks`, {
       method: 'POST',
       headers: {
         ...AuthUtils.getAuthHeaders(),
@@ -94,7 +94,7 @@ export class BookmarkAPI {
   ): Promise<Bookmark> {
     console.log('북마크 수정 요청 데이터:', data);
     
-    const response = await fetch(`${API_BASE_URL}/api/bookmarks/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/bookmarks/${id}`, {
       method: 'PUT',
       headers: {
         ...AuthUtils.getAuthHeaders(),
@@ -154,7 +154,7 @@ export class BookmarkAPI {
 
   // 북마크 삭제
   static async deleteBookmark(id: number): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/bookmarks/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/bookmarks/${id}`, {
       method: 'DELETE',
       headers: AuthUtils.getAuthHeaders(),
     });
@@ -177,7 +177,7 @@ export class BookmarkAPI {
 
   // 북마크 클릭 (조회수 증가)
   static async clickBookmark(id: number): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/bookmarks/${id}/click`, {
+    const response = await fetch(`${API_BASE_URL}/bookmarks/${id}/click`, {
       headers: AuthUtils.getAuthHeaders(),
     });
 
