@@ -30,7 +30,7 @@ export default function RootLayout({
         {/* 구글 애드센스 스크립트 */}
         <script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9741311517420372"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3712642250263014"
           crossOrigin="anonymous"
         ></script>
       </head>
